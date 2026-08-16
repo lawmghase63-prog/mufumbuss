@@ -1,0 +1,280 @@
+import { lazy, Suspense } from 'react'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { AuthProvider } from './lib/auth'
+import ProtectedRoute from './components/ProtectedRoute'
+import DashboardLayout from './layouts/DashboardLayout'
+import ComingSoon from './components/ComingSoon'
+import Login from './pages/Login'
+import Profile from './pages/Profile'
+import Students from './pages/Students'
+import Subjects from './pages/Subjects'
+import Assignments from './pages/Assignments'
+import Teachers from './pages/Teachers'
+import Exams from './pages/Exams'
+import MarkEntry from './pages/MarkEntry'
+import ResultsEntry from './pages/ResultsEntry'
+import MyClasses from './pages/MyClasses'
+import HeadmasterDashboard from './pages/dashboard/HeadmasterDashboard'
+import AcademicDashboard from './pages/dashboard/AcademicDashboard'
+import TeacherDashboard from './pages/dashboard/TeacherDashboard'
+import type { Role } from './lib/types'
+
+const Analysis = lazy(() => import('./pages/Analysis'))
+
+const analysisFallback = (
+  <div className="list-state">Loading analysis...</div>
+)
+
+const ALL_ROLES: Role[] = ['headmaster', 'academic', 'teacher']
+
+function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<Navigate to="/login" replace />} />
+
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute roles={ALL_ROLES}>
+                <DashboardLayout>
+                  <Profile />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/headmaster"
+            element={
+              <ProtectedRoute roles={['headmaster']}>
+                <DashboardLayout>
+                  <HeadmasterDashboard />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/headmaster/students"
+            element={
+              <ProtectedRoute roles={['headmaster']}>
+                <DashboardLayout>
+                  <Students />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/headmaster/subjects"
+            element={
+              <ProtectedRoute roles={['headmaster']}>
+                <DashboardLayout>
+                  <Subjects />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/headmaster/assignments"
+            element={
+              <ProtectedRoute roles={['headmaster']}>
+                <DashboardLayout>
+                  <Assignments />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/headmaster/teachers"
+            element={
+              <ProtectedRoute roles={['headmaster']}>
+                <DashboardLayout>
+                  <Teachers />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/headmaster/exams"
+            element={
+              <ProtectedRoute roles={['headmaster']}>
+                <DashboardLayout>
+                  <Exams />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/headmaster/results"
+            element={
+              <ProtectedRoute roles={['headmaster']}>
+                <DashboardLayout>
+                  <ResultsEntry />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/headmaster/analysis/:examId"
+            element={
+              <ProtectedRoute roles={['headmaster']}>
+                <DashboardLayout>
+                  <Suspense fallback={analysisFallback}><Analysis /></Suspense>
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/headmaster/:page"
+            element={
+              <ProtectedRoute roles={['headmaster']}>
+                <DashboardLayout>
+                  <ComingSoon />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/academic"
+            element={
+              <ProtectedRoute roles={['academic']}>
+                <DashboardLayout>
+                  <AcademicDashboard />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/academic/students"
+            element={
+              <ProtectedRoute roles={['academic']}>
+                <DashboardLayout>
+                  <Students />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/academic/subjects"
+            element={
+              <ProtectedRoute roles={['academic']}>
+                <DashboardLayout>
+                  <Subjects />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/academic/assignments"
+            element={
+              <ProtectedRoute roles={['academic']}>
+                <DashboardLayout>
+                  <Assignments />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/academic/teachers"
+            element={
+              <ProtectedRoute roles={['academic']}>
+                <DashboardLayout>
+                  <Teachers />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/academic/exams"
+            element={
+              <ProtectedRoute roles={['academic']}>
+                <DashboardLayout>
+                  <Exams />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/academic/results"
+            element={
+              <ProtectedRoute roles={['academic']}>
+                <DashboardLayout>
+                  <ResultsEntry />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/academic/analysis/:examId"
+            element={
+              <ProtectedRoute roles={['academic']}>
+                <DashboardLayout>
+                  <Suspense fallback={analysisFallback}><Analysis /></Suspense>
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/academic/:page"
+            element={
+              <ProtectedRoute roles={['academic']}>
+                <DashboardLayout>
+                  <ComingSoon />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/teacher"
+            element={
+              <ProtectedRoute roles={['teacher']}>
+                <DashboardLayout>
+                  <TeacherDashboard />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/teacher/my-classes"
+            element={
+              <ProtectedRoute roles={['teacher']}>
+                <DashboardLayout>
+                  <MyClasses />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/teacher/entry"
+            element={
+              <ProtectedRoute roles={['teacher']}>
+                <DashboardLayout>
+                  <MarkEntry />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/teacher/:page"
+            element={
+              <ProtectedRoute roles={['teacher']}>
+                <DashboardLayout>
+                  <ComingSoon />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
+  )
+}
+
+export default App
+
