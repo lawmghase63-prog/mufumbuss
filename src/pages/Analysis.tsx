@@ -19,6 +19,12 @@ import {
 } from '../lib/exams'
 import type { Student, Form } from '../lib/students'
 import type { Subject, SubjectType } from '../lib/subjects'
+import type { Combination } from '../lib/subjects'
+
+interface StudentCombination {
+  student_id: string
+  combination_id: string
+}
 
 interface SchoolSettings {
   id: string
@@ -103,6 +109,9 @@ export default function Analysis() {
   const [savingSettings, setSavingSettings] = useState(false)
   const [downloading, setDownloading] = useState(false)
   const [selectedForm, setSelectedForm] = useState<Form | 'ALL'>('ALL')
+  const [selectedCombinationId, setSelectedCombinationId] = useState<string | 'ALL'>('ALL')
+  const [combinations, setCombinations] = useState<Combination[]>([])
+  const [studentCombinations, setStudentCombinations] = useState<StudentCombination[]>([])
   const [viewMode, setViewMode] = useState<'marks' | 'grade'>('marks')
   const [flash, setFlash] = useState<{ type: 'ok' | 'error'; text: string } | null>(
     null,
@@ -112,7 +121,7 @@ export default function Analysis() {
     let alive = true
     async function load() {
       setLoading(true)
-      const [examRes, studRes, marksRes, resultsRes, subjRes, settingsRes] =
+      const [examRes, studRes, marksRes, resultsRes, subjRes, settingsRes, combosRes, scRes] =
         await Promise.all([
           supabase.from('exams').select('*').eq('id', examId ?? '').maybeSingle(),
           supabase.from('students').select('*'),
@@ -123,6 +132,8 @@ export default function Analysis() {
             .eq('exam_id', examId ?? ''),
           supabase.from('subjects').select('*'),
           supabase.from('school_settings').select('*').maybeSingle(),
+          supabase.from('combinations').select('*'),
+          supabase.from('student_combinations').select('student_id, combination_id'),
         ])
 
       if (!alive) return
@@ -145,6 +156,9 @@ export default function Analysis() {
         }[]) ?? [],
       )
       setSubjects((subjRes.data as Subject[]) ?? [])
+
+      setCombinations((combosRes.data as Combination[]) ?? [])
+      setStudentCombinations((scRes.data as StudentCombination[]) ?? [])
 
       const settingsRow = settingsRes.data as SchoolSettings | null
       setSettings(settingsRow)
@@ -176,9 +190,17 @@ export default function Analysis() {
   }, [students])
 
   const formFilteredResults = useMemo(() => {
-    if (selectedForm === 'ALL') return results
-    return results.filter((r) => r.form === selectedForm)
-  }, [results, selectedForm])
+    let filtered = selectedForm === 'ALL' ? results : results.filter((r) => r.form === selectedForm)
+    if (selectedCombinationId !== 'ALL' && (selectedForm === 'F5' || selectedForm === 'F6')) {
+      const studentIds = new Set(
+        studentCombinations
+          .filter((sc) => sc.combination_id === selectedCombinationId)
+          .map((sc) => sc.student_id),
+      )
+      filtered = filtered.filter((r) => studentIds.has(r.student_id))
+    }
+    return filtered
+  }, [results, selectedForm, selectedCombinationId, studentCombinations])
 
   const formFilteredMarks = useMemo(() => {
     const ids = new Set(formFilteredResults.map((r) => r.student_id))
@@ -562,7 +584,10 @@ export default function Analysis() {
 
       const safeName = (exam.name || 'Exam Analysis').replace(/[^\w\s-]/g, '')
       const formLabel = selectedForm === 'ALL' ? 'All Forms' : `Form ${selectedForm.slice(1)}`
-      doc.save(`${safeName} - ${formLabel} - Results Analysis.pdf`)
+      const comboLabel = selectedCombinationId !== 'ALL'
+        ? ` - ${combinations.find(c => c.id === selectedCombinationId)?.code ?? ''}`
+        : ''
+      doc.save(`${safeName} - ${formLabel}${comboLabel} - Results Analysis.pdf`)
     } catch (err) {
       setFlash({
         type: 'error',
@@ -713,17 +738,40 @@ export default function Analysis() {
         analysis && (
           <>
             <div className="chips-row form-picker no-print">
-              {(['ALL', 'F1', 'F2', 'F3', 'F4'] as const).map((f) => (
+              {['ALL', ...exam!.forms].map((f) => (
                 <button
                   key={f}
                   type="button"
                   className={selectedForm === f ? 'chip active' : 'chip'}
-                  onClick={() => setSelectedForm(f)}
+                  onClick={() => { setSelectedForm(f as Form | 'ALL'); setSelectedCombinationId('ALL') }}
                 >
                   {f === 'ALL' ? 'All Forms' : `Form ${f.slice(1)}`}
                 </button>
               ))}
             </div>
+
+            {(selectedForm === 'F5' || selectedForm === 'F6') && combinations.length > 0 && (
+              <div className="chips-row form-picker no-print">
+                <button
+                  type="button"
+                  className={selectedCombinationId === 'ALL' ? 'chip active' : 'chip'}
+                  onClick={() => setSelectedCombinationId('ALL')}
+                >
+                  All Combinations
+                </button>
+                {combinations.map((c) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    className={selectedCombinationId === c.id ? 'chip active' : 'chip'}
+                    onClick={() => setSelectedCombinationId(c.id)}
+                  >
+                    {c.code}
+                    <span>{c.name}</span>
+                  </button>
+                ))}
+              </div>
+            )}
 
             <section className="panel">
               <h3 className="screen-school">{schoolName}</h3>

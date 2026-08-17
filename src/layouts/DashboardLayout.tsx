@@ -6,7 +6,6 @@ import {
   Users,
   UserCog,
   ClipboardList,
-  BarChart3,
   CalendarCheck,
   BookOpen,
   PenLine,
@@ -42,14 +41,8 @@ const NAV_SECTIONS: Record<Role, NavSection[]> = {
         { to: '/headmaster/subjects', label: 'Subjects', icon: BookOpen },
         { to: '/headmaster/assignments', label: 'Assignments', icon: CheckSquare },
         { to: '/headmaster/teachers', label: 'Teachers', icon: UserCog },
-      ],
-    },
-    {
-      title: 'Academic',
-      items: [
         { to: '/headmaster/exams', label: 'Exams', icon: CalendarCheck },
         { to: '/headmaster/results', label: 'Results', icon: ClipboardList },
-        { to: '/headmaster/reports', label: 'Reports', icon: BarChart3 },
       ],
     },
   ],
@@ -63,13 +56,7 @@ const NAV_SECTIONS: Record<Role, NavSection[]> = {
         { to: '/academic/assignments', label: 'Assignments', icon: CheckSquare },
         { to: '/academic/teachers', label: 'Teachers', icon: UserCog },
         { to: '/academic/exams', label: 'Exams', icon: CalendarCheck },
-      ],
-    },
-    {
-      title: 'Results',
-      items: [
         { to: '/academic/results', label: 'Results Entry', icon: ClipboardList },
-        { to: '/academic/analysis', label: 'Analysis', icon: BarChart3 },
       ],
     },
   ],

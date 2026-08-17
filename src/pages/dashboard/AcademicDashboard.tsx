@@ -1,6 +1,8 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { CalendarCheck, BarChart3, Users, ArrowRight } from 'lucide-react'
 import { useAuth } from '../../lib/auth'
+import { supabase } from '../../lib/supabase'
 import StatCard from '../../components/StatCard'
 
 const TODAY = new Date().toLocaleDateString('en-GB', {
@@ -13,6 +15,35 @@ const TODAY = new Date().toLocaleDateString('en-GB', {
 export default function AcademicDashboard() {
   const { user } = useAuth()
   const firstName = user?.profile?.full_name.split(' ')[0] || ''
+
+  const [stats, setStats] = useState({
+    activeExams: 0,
+    subjects: 0,
+    classes: 0,
+    resultsEntered: 0,
+  })
+
+  useEffect(() => {
+    async function fetchStats() {
+      const [exams, subjects, forms, marks] = await Promise.all([
+        supabase.from('exams').select('id', { count: 'exact', head: true }).eq('status', 'active'),
+        supabase.from('subjects').select('id', { count: 'exact', head: true }),
+        supabase.from('students').select('form').eq('status', 'active'),
+        supabase.from('exam_marks').select('id', { count: 'exact', head: true }),
+      ])
+
+      const uniqueForms = new Set<string>()
+      forms.data?.forEach(s => uniqueForms.add(s.form))
+
+      setStats({
+        activeExams: exams.count ?? 0,
+        subjects: subjects.count ?? 0,
+        classes: uniqueForms.size,
+        resultsEntered: marks.count ?? 0,
+      })
+    }
+    fetchStats()
+  }, [])
 
   return (
     <>
@@ -38,10 +69,10 @@ export default function AcademicDashboard() {
       </section>
 
       <section className="stats-grid">
-        <StatCard label="Active Exams" value="—" />
-        <StatCard label="Subjects" value="—" />
-        <StatCard label="Classes" value="—" />
-        <StatCard label="Results Entered" value="—" />
+        <StatCard label="Active Exams" value={stats.activeExams} />
+        <StatCard label="Subjects" value={stats.subjects} />
+        <StatCard label="Classes" value={stats.classes} />
+        <StatCard label="Results Entered" value={stats.resultsEntered} />
       </section>
 
       <section className="panel">

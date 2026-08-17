@@ -10,7 +10,7 @@ import {
 import { supabase } from '../lib/supabase'
 import FlashMessage from '../components/FlashMessage'
 import type { Form, Student } from '../lib/students'
-import type { Subject } from '../lib/subjects'
+import type { Subject, Combination } from '../lib/subjects'
 import type { Exam, ExamMark } from '../lib/exams'
 import { parseMark } from '../lib/exams'
 
@@ -31,13 +31,15 @@ export default function ResultsEntry() {
   const [selectedForm, setSelectedForm] = useState<Form | null>(null)
   const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null)
   const [subjects, setSubjects] = useState<Subject[]>([])
+  const [combinations, setCombinations] = useState<Combination[]>([])
+  const [studentCombinations, setStudentCombinations] = useState<{ student_id: string; combination_id: string }[]>([])
   const [students, setStudents] = useState<Student[]>([])
   const [ssSet, setSsSet] = useState<Map<string, Set<string>>>(new Map())
   const [entries, setEntries] = useState<Map<string, Entry>>(new Map())
 
   useEffect(() => {
     async function load() {
-      const [examsRes, subjectsRes, studentsRes, ssRes] = await Promise.all([
+      const [examsRes, subjectsRes, studentsRes, ssRes, combosRes, scRes] = await Promise.all([
         supabase.from('exams').select('*').order('created_at', { ascending: false }),
         supabase.from('subjects').select('*').order('code', { ascending: true }),
         supabase
@@ -45,11 +47,15 @@ export default function ResultsEntry() {
           .select('id, admission_no, full_name, form, status')
           .eq('status', 'active'),
         supabase.from('student_subjects').select('student_id, subject_id'),
+        supabase.from('combinations').select('*'),
+        supabase.from('student_combinations').select('student_id, combination_id'),
       ])
 
       setExams((examsRes.data as Exam[]) ?? [])
       setSubjects((subjectsRes.data as Subject[]) ?? [])
       setStudents((studentsRes.data as Student[]) ?? [])
+      setCombinations((combosRes.data as Combination[]) ?? [])
+      setStudentCombinations((scRes.data as { student_id: string; combination_id: string }[]) ?? [])
 
       const map = new Map<string, Set<string>>()
       ;(ssRes.data as { student_id: string; subject_id: string }[] | null)?.forEach(
@@ -89,15 +95,55 @@ export default function ResultsEntry() {
     [students, selectedForm],
   )
 
+  const isALevelForm = selectedForm === 'F5' || selectedForm === 'F6'
+
+  const subjectIdByCode = useMemo(() => {
+    const map = new Map<string, string>()
+    for (const s of subjects) map.set(s.code, s.id)
+    return map
+  }, [subjects])
+
+  const comboByStudentId = useMemo(() => {
+    const map = new Map<string, Combination>()
+    for (const sc of studentCombinations) {
+      const combo = combinations.find((c) => c.id === sc.combination_id)
+      if (combo) map.set(sc.student_id, combo)
+    }
+    return map
+  }, [studentCombinations, combinations])
+
+  const studentSubjectsMap = useMemo(() => {
+    const map = new Map<string, Set<string>>()
+    for (const s of students) {
+      if (isALevelForm) {
+        const combo = comboByStudentId.get(s.id)
+        if (!combo) continue
+        const ids = new Set<string>()
+        for (const code of combo.core_subjects) {
+          const id = subjectIdByCode.get(code)
+          if (id) ids.add(id)
+        }
+        for (const code of combo.subsidiary_subjects) {
+          const id = subjectIdByCode.get(code)
+          if (id) ids.add(id)
+        }
+        map.set(s.id, ids)
+      } else {
+        map.set(s.id, ssSet.get(s.id) ?? new Set())
+      }
+    }
+    return map
+  }, [students, isALevelForm, ssSet, comboByStudentId, subjectIdByCode])
+
   const subjectsInForm = useMemo(() => {
     const seen = new Set<string>()
     studentsInForm.forEach((s) => {
-      ssSet.get(s.id)?.forEach((subjectId) => seen.add(subjectId))
+      studentSubjectsMap.get(s.id)?.forEach((subjectId) => seen.add(subjectId))
     })
     return subjects
       .filter((sub) => seen.has(sub.id))
       .sort((a, b) => a.code.localeCompare(b.code))
-  }, [studentsInForm, ssSet, subjects])
+  }, [studentsInForm, subjects, studentSubjectsMap])
 
   useEffect(() => {
     if (subjectsInForm.length === 0) {
@@ -111,12 +157,12 @@ export default function ResultsEntry() {
     const map = new Map<string, Student[]>()
     subjectsInForm.forEach((sub) => {
       const list = studentsInForm.filter(
-        (s) => ssSet.get(s.id)?.has(sub.id),
+        (s) => studentSubjectsMap.get(s.id)?.has(sub.id),
       )
       map.set(sub.id, list)
     })
     return map
-  }, [subjectsInForm, studentsInForm, ssSet])
+  }, [subjectsInForm, studentsInForm, studentSubjectsMap])
 
   useEffect(() => {
     if (!selectedExamId) {

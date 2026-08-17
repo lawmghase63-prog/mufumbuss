@@ -12,7 +12,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
 import FlashMessage from '../components/FlashMessage'
 import type { Form, Student } from '../lib/students'
-import type { Subject } from '../lib/subjects'
+import type { Subject, Combination } from '../lib/subjects'
 import type { Teacher, TeacherAssignment } from '../lib/teachers'
 import type { Exam, ExamMark } from '../lib/exams'
 import { parseMark } from '../lib/exams'
@@ -41,6 +41,8 @@ export default function MarkEntry() {
   const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null)
   const [assignments, setAssignments] = useState<TeacherAssignment[]>([])
   const [subjects, setSubjects] = useState<Subject[]>([])
+  const [combinations, setCombinations] = useState<Combination[]>([])
+  const [studentCombinations, setStudentCombinations] = useState<{ student_id: string; combination_id: string }[]>([])
   const [students, setStudents] = useState<Student[]>([])
   const [ssSet, setSsSet] = useState<Map<string, Set<string>>>(new Map())
   const [entries, setEntries] = useState<Map<string, Entry>>(new Map())
@@ -52,7 +54,7 @@ export default function MarkEntry() {
       const myTeacher = (teacherRes.data as Teacher[] | null)?.[0] ?? null
       setTeacher(myTeacher)
 
-      const [examsRes, subjectsRes, studentsRes, ssRes] = await Promise.all([
+      const [examsRes, subjectsRes, studentsRes, ssRes, combosRes, scRes] = await Promise.all([
         supabase
           .from('exams')
           .select('*')
@@ -64,11 +66,15 @@ export default function MarkEntry() {
           .select('id, admission_no, full_name, form, status')
           .eq('status', 'active'),
         supabase.from('student_subjects').select('student_id, subject_id'),
+        supabase.from('combinations').select('*'),
+        supabase.from('student_combinations').select('student_id, combination_id'),
       ])
 
       setExams((examsRes.data as Exam[]) ?? [])
       setSubjects((subjectsRes.data as Subject[]) ?? [])
       setStudents((studentsRes.data as Student[]) ?? [])
+      setCombinations((combosRes.data as Combination[]) ?? [])
+      setStudentCombinations((scRes.data as { student_id: string; combination_id: string }[]) ?? [])
 
       const map = new Map<string, Set<string>>()
       ;(ssRes.data as { student_id: string; subject_id: string }[] | null)?.forEach(
@@ -145,6 +151,44 @@ export default function MarkEntry() {
     }
   }, [examSubjects, selectedSubjectId])
 
+  const subjectIdByCode = useMemo(() => {
+    const map = new Map<string, string>()
+    for (const s of subjects) map.set(s.code, s.id)
+    return map
+  }, [subjects])
+
+  const comboByStudentId = useMemo(() => {
+    const map = new Map<string, Combination>()
+    for (const sc of studentCombinations) {
+      const combo = combinations.find((c) => c.id === sc.combination_id)
+      if (combo) map.set(sc.student_id, combo)
+    }
+    return map
+  }, [studentCombinations, combinations])
+
+  const studentSubjectsMap = useMemo(() => {
+    const map = new Map<string, Set<string>>()
+    for (const s of students) {
+      if (s.form === 'F5' || s.form === 'F6') {
+        const combo = comboByStudentId.get(s.id)
+        if (!combo) { map.set(s.id, new Set()); continue }
+        const ids = new Set<string>()
+        for (const code of combo.core_subjects) {
+          const id = subjectIdByCode.get(code)
+          if (id) ids.add(id)
+        }
+        for (const code of combo.subsidiary_subjects) {
+          const id = subjectIdByCode.get(code)
+          if (id) ids.add(id)
+        }
+        map.set(s.id, ids)
+      } else {
+        map.set(s.id, ssSet.get(s.id) ?? new Set())
+      }
+    }
+    return map
+  }, [students, ssSet, comboByStudentId, subjectIdByCode])
+
   const blockStudents = useMemo(() => {
     const map = new Map<string, Student[]>()
     blocks.forEach((block) => {
@@ -152,14 +196,13 @@ export default function MarkEntry() {
       const list = students
         .filter((s) => {
           if (s.form !== block.form) return false
-          const subs = ssSet.get(s.id)
-          return !!subs?.has(block.subject.id)
+          return studentSubjectsMap.get(s.id)?.has(block.subject.id) ?? false
         })
         .sort((a, b) => a.admission_no.localeCompare(b.admission_no))
       map.set(key, list)
     })
     return map
-  }, [blocks, students, ssSet])
+  }, [blocks, students, studentSubjectsMap])
 
   useEffect(() => {
     if (!selectedExamId || !teacher) {
