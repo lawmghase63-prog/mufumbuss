@@ -20,9 +20,13 @@ import TeacherDashboard from './pages/dashboard/TeacherDashboard'
 import type { Role } from './lib/types'
 
 const Analysis = lazy(() => import('./pages/Analysis'))
+const Reports = lazy(() => import('./pages/Reports'))
 
 const analysisFallback = (
   <div className="list-state">Loading analysis...</div>
+)
+const reportsFallback = (
+  <div className="list-state">Loading reports...</div>
 )
 
 const ALL_ROLES: Role[] = ['headmaster', 'academic', 'teacher']
@@ -117,6 +121,16 @@ function App() {
             }
           />
           <Route
+            path="/headmaster/reports"
+            element={
+              <ProtectedRoute roles={['headmaster']}>
+                <DashboardLayout>
+                  <Suspense fallback={reportsFallback}><Reports /></Suspense>
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/headmaster/analysis/:examId"
             element={
               <ProtectedRoute roles={['headmaster']}>
@@ -203,6 +217,16 @@ function App() {
               <ProtectedRoute roles={['academic']}>
                 <DashboardLayout>
                   <ResultsEntry />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/academic/reports"
+            element={
+              <ProtectedRoute roles={['academic']}>
+                <DashboardLayout>
+                  <Suspense fallback={reportsFallback}><Reports /></Suspense>
                 </DashboardLayout>
               </ProtectedRoute>
             }

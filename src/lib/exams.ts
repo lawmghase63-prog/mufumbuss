@@ -99,11 +99,11 @@ export function gradeForMark(mark: number, level: ResultLevel): string | null {
     if (mark >= 30) return 'D'
     return 'F'
   }
-  if (mark >= 81) return 'A'
+  if (mark >= 80) return 'A'
   if (mark >= 70) return 'B'
   if (mark >= 60) return 'C'
   if (mark >= 50) return 'D'
-  if (mark >= 45) return 'E'
+  if (mark >= 40) return 'E'
   if (mark >= 35) return 'S'
   return 'F'
 }
@@ -134,18 +134,18 @@ export function pointsForMark(mark: number, level: ResultLevel): number {
   return pointsForGrade(gradeForMark(mark, 'a') ?? 'F')
 }
 
-export function oLevelDivision(dBelow: number): Division {
-  if (dBelow <= 1) return 'I'
-  if (dBelow <= 3) return 'II'
-  if (dBelow === 4) return 'III'
-  if (dBelow === 5) return 'IV'
+export function oLevelDivision(points: number): Division {
+  if (points <= 17) return 'I'
+  if (points <= 21) return 'II'
+  if (points <= 25) return 'III'
+  if (points <= 33) return 'IV'
   return '0'
 }
 
 export function aLevelDivision(points: number): Division {
-  if (points <= 7) return 'I'
+  if (points <= 9) return 'I'
   if (points <= 12) return 'II'
-  if (points <= 16) return 'III'
+  if (points <= 17) return 'III'
   if (points <= 19) return 'IV'
   return '0'
 }
@@ -173,16 +173,17 @@ export function computeDivision(
 
   if (level === 'o') {
     const best = [...rows].sort((a, b) => b.total - a.total).slice(0, 7)
+    const points = best.reduce((sum, s) => sum + pointsForMark(s.total, 'o'), 0)
     const dBelow = best.filter(
       (s) => gradeForMark(s.total, 'o') === 'D' || gradeForMark(s.total, 'o') === 'F',
     ).length
     return {
       level,
-      division: oLevelDivision(dBelow),
+      division: oLevelDivision(points),
       subjectsUsed: rows.length,
       bestCount: best.length,
       dBelow,
-      points: 0,
+      points,
     }
   }
 

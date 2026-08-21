@@ -1734,41 +1734,6 @@
   color: #fff;
 }
 
-.exam-results-summary {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-top: 12px;
-  padding: 10px 12px;
-  border: 1px solid #e7e4ee;
-  border-radius: 10px;
-  background: #faf9fc;
-}
-
-.exam-results-summary .results-total {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--text-h);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.exam-results-summary .division-counts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.division-count {
-  font-size: 0.76rem;
-  font-weight: 700;
-  color: var(--text-h);
-  background: #fff;
-  border: 1px solid #e7e4ee;
-  border-radius: 999px;
-  padding: 2px 9px;
-}
-
 /* ---------- Mark entry (teacher) ---------- */
 .exam-picker {
   margin-bottom: 20px;
@@ -3517,5 +3482,175 @@
 
   .analysis-table td {
     border-color: #c8c6ce;
+  }
+}
+
+/* ---------- Student reports ---------- */
+.reports-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.report-form-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 76px;
+  padding: 18px 12px;
+  background: #f8f9fa;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-h);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.report-form-btn:hover {
+  border-color: #0b5e2e;
+  background: #e8f5e9;
+  color: #0b5e2e;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(11, 94, 46, 0.12);
+}
+
+.reports-exam-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.reports-exam-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  background: #f8f9fa;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+}
+
+.reports-exam-item:hover:not(:disabled) {
+  border-color: #0b5e2e;
+  background: #e8f5e9;
+}
+
+.reports-exam-item:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.reports-exam-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.reports-exam-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12.5px;
+  color: #777;
+  white-space: nowrap;
+}
+
+/* ---------- Professional polish ---------- */
+.panel > h3 {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+  color: var(--text-h);
+}
+
+.panel > h4 {
+  margin: 0 0 14px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.icon-btn,
+.topbar-menu {
+  box-shadow: none;
+  border: 1px solid var(--border);
+}
+
+.side-link.active {
+  background: rgba(255, 255, 255, 0.14);
+  box-shadow: none;
+}
+
+.avatar {
+  box-shadow: none;
+}
+
+.stat-card {
+  box-shadow: none;
+}
+
+.table-scroll,
+.analysis-table-wrap {
+  -webkit-overflow-scrolling: touch;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.modal {
+  max-height: calc(100dvh - 32px);
+}
+
+@media (max-width: 520px) {
+  .page-head h2 {
+    font-size: 1.08rem;
+  }
+
+  .reports-exam-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .reports-exam-meta {
+    white-space: normal;
+  }
+
+  .exam-actions {
+    flex-wrap: wrap;
+  }
+
+  .exam-act {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+
+  .chips-row {
+    gap: 7px;
+  }
+
+  .chip {
+    padding: 7px 12px;
+    font-size: 0.78rem;
+  }
+
+  .modal {
+    padding: 18px 16px;
+    border-radius: 14px;
   }
 }

@@ -24,12 +24,6 @@ import type { Exam, ExamMark, Division, StudentMarkEntry } from '../lib/exams'
 import { examTypeLabel, formatExamDates, computeDivision } from '../lib/exams'
 import type { Student } from '../lib/students'
 
-type DivisionCounts = Record<Division, number>
-
-const EMPTY_DIVISIONS: DivisionCounts = { I: 0, II: 0, III: 0, IV: 0, '0': 0 }
-
-const DIVISION_KEYS: Division[] = ['I', 'II', 'III', 'IV', '0']
-
 export default function Exams() {
   const [exams, setExams] = useState<Exam[]>([])
   const [loading, setLoading] = useState(true)
@@ -48,7 +42,6 @@ export default function Exams() {
     action: () => void
   } | null>(null)
   const [processingId, setProcessingId] = useState<string | null>(null)
-  const [results, setResults] = useState<Record<string, DivisionCounts>>({})
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -59,13 +52,10 @@ export default function Exams() {
 
   async function load() {
     setLoading(true)
-    const [examsRes, resultsRes] = await Promise.all([
-      supabase
-        .from('exams')
-        .select('*')
-        .order('created_at', { ascending: false }),
-      supabase.from('exam_results').select('exam_id, division'),
-    ])
+    const examsRes = await supabase
+      .from('exams')
+      .select('*')
+      .order('created_at', { ascending: false })
     if (examsRes.error) {
       setTableMissing(
         /relation "public\.exams" does not exist/i.test(examsRes.error.message),
@@ -73,16 +63,6 @@ export default function Exams() {
     } else {
       setTableMissing(false)
       setExams((examsRes.data as Exam[]) ?? [])
-      const map: Record<string, DivisionCounts> = {}
-      for (const r of (resultsRes.data ?? []) as {
-        exam_id: string
-        division: Division
-      }[]) {
-        const counts = map[r.exam_id] ?? { ...EMPTY_DIVISIONS }
-        counts[r.division] += 1
-        map[r.exam_id] = counts
-      }
-      setResults(map)
     }
     setLoading(false)
   }
@@ -229,9 +209,7 @@ export default function Exams() {
         .upsert(rows, { onConflict: 'exam_id,student_id' })
       if (error) throw new Error(error.message)
 
-      const counts: DivisionCounts = { ...EMPTY_DIVISIONS }
-      for (const r of rows) counts[r.division]++
-      const summary = `Processed ${rows.length} students for "${exam.name}"${skipped ? ` (${skipped} without enough marks)` : ''}. Divisions — I: ${counts.I}, II: ${counts.II}, III: ${counts.III}, IV: ${counts.IV}, 0: ${counts['0']}.`
+      const summary = `Processed ${rows.length} students for "${exam.name}"${skipped ? ` (${skipped} without enough marks)` : ''}.`
       setFlash({ type: 'ok', text: summary })
       load()
       navigate(analysisPath(exam.id))
@@ -406,26 +384,6 @@ export default function Exams() {
                   Delete
                 </button>
               </div>
-
-              {results[exam.id] && (
-                <div className="exam-results-summary">
-                  <span className="results-total">
-                    Divisions ·{' '}
-                    {DIVISION_KEYS.reduce(
-                      (sum, k) => sum + (results[exam.id]?.[k] ?? 0),
-                      0,
-                    )}{' '}
-                    students
-                  </span>
-                  <div className="division-counts">
-                    {DIVISION_KEYS.map((d) => (
-                      <span key={d} className="division-count">
-                        {d}: {results[exam.id]?.[d] ?? 0}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
             </section>
           ))}
         </div>

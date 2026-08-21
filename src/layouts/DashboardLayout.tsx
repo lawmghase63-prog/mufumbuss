@@ -14,6 +14,7 @@ import {
   X,
   UserCircle,
   CheckSquare,
+  FileText,
   type LucideIcon,
 } from 'lucide-react'
 import { useAuth } from '../lib/auth'
@@ -43,6 +44,7 @@ const NAV_SECTIONS: Record<Role, NavSection[]> = {
         { to: '/headmaster/teachers', label: 'Teachers', icon: UserCog },
         { to: '/headmaster/exams', label: 'Exams', icon: CalendarCheck },
         { to: '/headmaster/results', label: 'Results', icon: ClipboardList },
+        { to: '/headmaster/reports', label: 'Reports', icon: FileText },
       ],
     },
   ],
@@ -57,6 +59,7 @@ const NAV_SECTIONS: Record<Role, NavSection[]> = {
         { to: '/academic/teachers', label: 'Teachers', icon: UserCog },
         { to: '/academic/exams', label: 'Exams', icon: CalendarCheck },
         { to: '/academic/results', label: 'Results Entry', icon: ClipboardList },
+        { to: '/academic/reports', label: 'Reports', icon: FileText },
       ],
     },
   ],
