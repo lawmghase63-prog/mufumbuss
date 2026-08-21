@@ -5,6 +5,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import DashboardLayout from './layouts/DashboardLayout'
 import ComingSoon from './components/ComingSoon'
 import Login from './pages/Login'
+import ForgotPassword from './pages/ForgotPassword'
 import Profile from './pages/Profile'
 import Students from './pages/Students'
 import Subjects from './pages/Subjects'
@@ -37,6 +38,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/" element={<Navigate to="/login" replace />} />
 
           <Route

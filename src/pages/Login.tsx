@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import {
   GraduationCap,
   Mail,
@@ -152,9 +152,9 @@ export default function Login() {
                 <label className="remember">
                   <input type="checkbox" defaultChecked /> Remember me
                 </label>
-                <a className="forgot-link" href="#">
+                <Link className="forgot-link" to="/forgot-password">
                   Forgot password?
-                </a>
+                </Link>
               </div>
 
               {error && (

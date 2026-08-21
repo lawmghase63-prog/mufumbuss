@@ -543,3 +543,131 @@
     padding-inline: 18px;
   }
 }
+
+.reset-steps {
+  list-style: none;
+  display: flex;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+}
+
+.reset-step {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  border: 1px solid #e7e4ee;
+  border-radius: 11px;
+  background: #faf9fc;
+}
+
+.reset-step-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #6b7280;
+  background: #eceaf2;
+  flex-shrink: 0;
+}
+
+.reset-step-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #6b7280;
+  line-height: 1.2;
+}
+
+.reset-step.current {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+}
+
+.reset-step.current .reset-step-dot {
+  color: #fff;
+  background: var(--accent);
+}
+
+.reset-step.current .reset-step-label {
+  color: #047857;
+}
+
+.reset-step.done .reset-step-dot {
+  color: #fff;
+  background: #059669;
+}
+
+.otp-input {
+  width: 100%;
+  padding: 13px 16px;
+  font: inherit;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 12px;
+  text-indent: 12px;
+  text-align: center;
+  color: #1f2937;
+  background: #fff;
+  border: 1.5px solid #e7e4ee;
+  border-radius: 12px;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  box-sizing: border-box;
+}
+
+.otp-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-bg);
+}
+
+.link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #047857;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  padding: 4px 2px;
+}
+
+.link-btn:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
+.link-btn:disabled {
+  color: #9ca3af;
+  cursor: default;
+}
+
+.reset-links {
+  margin-top: -4px;
+}
+
+.reset-done {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  padding: 18px 0 4px;
+}
+
+.reset-done-icon {
+  color: #059669;
+}
+
+.reset-done .signin-btn {
+  width: 100%;
+  justify-content: center;
+  margin-top: 8px;
+}
