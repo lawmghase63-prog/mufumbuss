@@ -1,5 +1,5 @@
-import { useEffect, useState, type ReactNode } from 'react'
-import { Link, NavLink, useLocation } from 'react-router-dom'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import {
   GraduationCap,
   LayoutDashboard,
@@ -15,6 +15,7 @@ import {
   UserCircle,
   CheckSquare,
   FileText,
+  ChevronDown,
   type LucideIcon,
 } from 'lucide-react'
 import { useAuth } from '../lib/auth'
@@ -84,10 +85,14 @@ function roleTitle(role: Role) {
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const { user, signOut } = useAuth()
   const location = useLocation()
+  const navigate = useNavigate()
   const [open, setOpen] = useState(false)
+  const [accountOpen, setAccountOpen] = useState(false)
+  const accountRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     setOpen(false)
+    setAccountOpen(false)
   }, [location.pathname])
 
   useEffect(() => {
@@ -96,6 +101,24 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       document.body.style.overflow = ''
     }
   }, [open])
+
+  useEffect(() => {
+    if (!accountOpen) return
+    function onDocClick(e: MouseEvent) {
+      if (accountRef.current && !accountRef.current.contains(e.target as Node)) {
+        setAccountOpen(false)
+      }
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setAccountOpen(false)
+    }
+    document.addEventListener('mousedown', onDocClick)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onDocClick)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [accountOpen])
 
   if (!user?.profile) return null
   const role = user.profile.role
@@ -200,9 +223,55 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           </div>
 
           <div className="topbar-actions">
-            <Link to="/profile" className="avatar-link" aria-label="Profile">
-              <span className="avatar topbar-avatar">{initials}</span>
-            </Link>
+            <div
+              ref={accountRef}
+              className={accountOpen ? 'account-menu open' : 'account-menu'}
+            >
+              <button
+                type="button"
+                className="account-trigger"
+                onClick={() => setAccountOpen((v) => !v)}
+                aria-haspopup="menu"
+                aria-expanded={accountOpen}
+                aria-label="Account menu"
+              >
+                <span className="avatar topbar-avatar">{initials}</span>
+                <ChevronDown size={15} className="account-caret" />
+              </button>
+              {accountOpen && (
+                <div className="account-dropdown" role="menu">
+                  <div className="account-dd-head">
+                    <span className="avatar dd-avatar">{initials}</span>
+                    <div className="account-dd-meta">
+                      <strong>{displayName}</strong>
+                      <small>{user.email}</small>
+                    </div>
+                  </div>
+                  <NavLink
+                    to="/profile"
+                    role="menuitem"
+                    className="account-dd-item"
+                    onClick={() => setAccountOpen(false)}
+                  >
+                    <UserCircle size={17} />
+                    My Profile
+                  </NavLink>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="account-dd-item danger"
+                    onClick={async () => {
+                      setAccountOpen(false)
+                      await signOut()
+                      navigate('/login', { replace: true })
+                    }}
+                  >
+                    <LogOut size={17} />
+                    Sign out
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </header>
 
