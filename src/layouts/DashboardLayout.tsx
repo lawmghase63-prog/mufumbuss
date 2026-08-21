@@ -19,7 +19,6 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../lib/auth'
 import type { Role } from '../lib/types'
-import NotificationsBell from '../components/NotificationsBell'
 
 interface NavItem {
   to: string
@@ -201,7 +200,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           </div>
 
           <div className="topbar-actions">
-            <NotificationsBell />
             <Link to="/profile" className="avatar-link" aria-label="Profile">
               <span className="avatar topbar-avatar">{initials}</span>
             </Link>
