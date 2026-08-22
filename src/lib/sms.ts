@@ -37,7 +37,7 @@ export function formatPhoneDisplay(phone: string): string {
 }
 
 export const AUTO_TEMPLATE_DEFAULT =
-  'Mufumbu SS: Matokeo ya {EXAM} ya {NAME} ({FORM}): Wastani {AVG}%, Div {DIV}, Nafasi {POS} kati ya {TOTAL}. Asante.'
+  'Mufumbu SS: Results of {EXAM} for {NAME} ({FORM}): Average {AVG}%, Division {DIV}, Position {POS} out of {TOTAL}. Thank you.'
 
 export interface TemplateVars {
   NAME: string
