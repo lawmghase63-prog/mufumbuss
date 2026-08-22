@@ -15,6 +15,7 @@ import {
   UserCircle,
   CheckSquare,
   FileText,
+  MessageSquare,
   ChevronDown,
   type LucideIcon,
 } from 'lucide-react'
@@ -45,6 +46,7 @@ const NAV_SECTIONS: Record<Role, NavSection[]> = {
         { to: '/headmaster/exams', label: 'Exams', icon: CalendarCheck },
         { to: '/headmaster/results', label: 'Results', icon: ClipboardList },
         { to: '/headmaster/reports', label: 'Reports', icon: FileText },
+        { to: '/headmaster/sms', label: 'SMS', icon: MessageSquare },
       ],
     },
   ],
@@ -60,6 +62,7 @@ const NAV_SECTIONS: Record<Role, NavSection[]> = {
         { to: '/academic/exams', label: 'Exams', icon: CalendarCheck },
         { to: '/academic/results', label: 'Results Entry', icon: ClipboardList },
         { to: '/academic/reports', label: 'Reports', icon: FileText },
+        { to: '/academic/sms', label: 'SMS', icon: MessageSquare },
       ],
     },
   ],

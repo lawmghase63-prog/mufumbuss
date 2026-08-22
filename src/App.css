@@ -3602,3 +3602,102 @@ textarea:focus-visible {
     display: none;
   }
 }
+
+/* ---------------- SMS page ---------------- */
+.sms-controls-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.sms-exam-field {
+  min-width: 260px;
+  max-width: 360px;
+}
+
+.sms-exam-field select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--line, #d8d5de);
+  border-radius: 10px;
+  background: #fff;
+  font-size: 14px;
+}
+
+.sms-form-picker {
+  margin: 0;
+}
+
+.sms-compose {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.sms-mode-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.sms-compose textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--line, #d8d5de);
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.sms-hint {
+  color: #777;
+  font-size: 12.5px;
+}
+
+.sms-table input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  accent-color: #0b3d2e;
+  cursor: pointer;
+}
+
+.sms-phone-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sms-phone-cell input {
+  width: 130px;
+  padding: 6px 8px;
+  border: 1px solid var(--line, #d8d5de);
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.sms-phone-cell .sms-phone-bad {
+  border-color: #b3261e;
+  background: #fdf1f0;
+}
+
+.sms-send-one {
+  padding: 7px 10px;
+}
+
+.sms-row-invalid td {
+  opacity: 0.72;
+}
+
+.sms-missing-warn {
+  color: #b3261e;
+  font-weight: 600;
+}
+
+.sms-missing-note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+}

@@ -22,12 +22,16 @@ import type { Role } from './lib/types'
 
 const Analysis = lazy(() => import('./pages/Analysis'))
 const Reports = lazy(() => import('./pages/Reports'))
+const Sms = lazy(() => import('./pages/Sms'))
 
 const analysisFallback = (
   <div className="list-state">Loading analysis...</div>
 )
 const reportsFallback = (
   <div className="list-state">Loading reports...</div>
+)
+const smsFallback = (
+  <div className="list-state">Loading SMS...</div>
 )
 
 const ALL_ROLES: Role[] = ['headmaster', 'academic', 'teacher']
@@ -143,6 +147,16 @@ function App() {
             }
           />
           <Route
+            path="/headmaster/sms"
+            element={
+              <ProtectedRoute roles={['headmaster']}>
+                <DashboardLayout>
+                  <Suspense fallback={smsFallback}><Sms /></Suspense>
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/headmaster/:page"
             element={
               <ProtectedRoute roles={['headmaster']}>
@@ -239,6 +253,16 @@ function App() {
               <ProtectedRoute roles={['academic']}>
                 <DashboardLayout>
                   <Suspense fallback={analysisFallback}><Analysis /></Suspense>
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/academic/sms"
+            element={
+              <ProtectedRoute roles={['academic']}>
+                <DashboardLayout>
+                  <Suspense fallback={smsFallback}><Sms /></Suspense>
                 </DashboardLayout>
               </ProtectedRoute>
             }
