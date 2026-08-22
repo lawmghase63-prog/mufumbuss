@@ -17,6 +17,7 @@ import {
   MessageSquare,
   Eye,
   TrendingUp,
+  Globe,
   ChevronDown,
   type LucideIcon,
 } from 'lucide-react'
@@ -197,6 +198,10 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
               <UserCircle size={18} className="side-link-icon" />
               <span className="side-link-label">Profile</span>
             </NavLink>
+            <a href="/" className="side-link">
+              <Globe size={18} className="side-link-icon" />
+              <span className="side-link-label">School Website</span>
+            </a>
           </div>
         </nav>
 
