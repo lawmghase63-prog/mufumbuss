@@ -25,6 +25,7 @@ const Reports = lazy(() => import('./pages/Reports'))
 const Sms = lazy(() => import('./pages/Sms'))
 const ViewResults = lazy(() => import('./pages/ViewResults'))
 const Comparison = lazy(() => import('./pages/Comparison'))
+const Landing = lazy(() => import('./pages/Landing'))
 
 const analysisFallback = (
   <div className="list-state">Loading analysis...</div>
@@ -51,7 +52,14 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route
+            path="/"
+            element={
+              <Suspense fallback={<div className="list-state">Loading...</div>}>
+                <Landing />
+              </Suspense>
+            }
+          />
 
           <Route
             path="/profile"
