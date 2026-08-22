@@ -22,6 +22,7 @@ import {
   Landmark,
 } from 'lucide-react'
 import logo from '../assets/logo.png'
+import './Landing.css'
 
 /* ==========================================================
    EDIT SCHOOL CONTENT HERE — swap these values anytime
