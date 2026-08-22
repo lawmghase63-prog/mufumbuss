@@ -3701,3 +3701,43 @@ textarea:focus-visible {
   gap: 6px;
   margin-top: 10px;
 }
+
+/* ---------------- Comparison ---------------- */
+.cmp-up {
+  color: #1b7a3d;
+  font-weight: 600;
+}
+
+.cmp-down {
+  color: #b3261e;
+  font-weight: 600;
+}
+
+.cmp-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.cmp-badge.up {
+  background: #e6f4ea;
+  color: #1b7a3d;
+}
+
+.cmp-badge.down {
+  background: #fdeceb;
+  color: #b3261e;
+}
+
+.cmp-badge.flat {
+  background: #f0f0f2;
+  color: #555;
+}
+
+.comparison-summary h3 {
+  margin-bottom: 4px;
+}

@@ -16,6 +16,8 @@ import {
   CheckSquare,
   FileText,
   MessageSquare,
+  Eye,
+  TrendingUp,
   ChevronDown,
   type LucideIcon,
 } from 'lucide-react'
@@ -46,6 +48,7 @@ const NAV_SECTIONS: Record<Role, NavSection[]> = {
         { to: '/headmaster/exams', label: 'Exams', icon: CalendarCheck },
         { to: '/headmaster/results', label: 'Results', icon: ClipboardList },
         { to: '/headmaster/reports', label: 'Reports', icon: FileText },
+        { to: '/headmaster/view-results', label: 'View Results', icon: Eye },
         { to: '/headmaster/sms', label: 'SMS', icon: MessageSquare },
       ],
     },
@@ -62,6 +65,7 @@ const NAV_SECTIONS: Record<Role, NavSection[]> = {
         { to: '/academic/exams', label: 'Exams', icon: CalendarCheck },
         { to: '/academic/results', label: 'Results Entry', icon: ClipboardList },
         { to: '/academic/reports', label: 'Reports', icon: FileText },
+        { to: '/academic/view-results', label: 'View Results', icon: Eye },
         { to: '/academic/sms', label: 'SMS', icon: MessageSquare },
       ],
     },
@@ -71,13 +75,15 @@ const NAV_SECTIONS: Record<Role, NavSection[]> = {
       title: 'Main',
       items: [{ to: '/teacher', label: 'Overview', icon: LayoutDashboard }],
     },
-    {
-      title: 'Teaching',
-      items: [
-        { to: '/teacher/my-classes', label: 'My Classes', icon: BookOpen },
-        { to: '/teacher/entry', label: 'Enter Results', icon: PenLine },
-      ],
-    },
+  {
+    title: 'Teaching',
+    items: [
+      { to: '/teacher/my-classes', label: 'My Classes', icon: BookOpen },
+      { to: '/teacher/entry', label: 'Enter Results', icon: PenLine },
+      { to: '/teacher/view-results', label: 'View Results', icon: Eye },
+      { to: '/teacher/comparison', label: 'Comparison', icon: TrendingUp },
+    ],
+  },
   ],
 }
 

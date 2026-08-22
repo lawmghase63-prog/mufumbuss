@@ -23,6 +23,8 @@ import type { Role } from './lib/types'
 const Analysis = lazy(() => import('./pages/Analysis'))
 const Reports = lazy(() => import('./pages/Reports'))
 const Sms = lazy(() => import('./pages/Sms'))
+const ViewResults = lazy(() => import('./pages/ViewResults'))
+const Comparison = lazy(() => import('./pages/Comparison'))
 
 const analysisFallback = (
   <div className="list-state">Loading analysis...</div>
@@ -32,6 +34,12 @@ const reportsFallback = (
 )
 const smsFallback = (
   <div className="list-state">Loading SMS...</div>
+)
+const viewResultsFallback = (
+  <div className="list-state">Loading results...</div>
+)
+const comparisonFallback = (
+  <div className="list-state">Loading comparison...</div>
 )
 
 const ALL_ROLES: Role[] = ['headmaster', 'academic', 'teacher']
@@ -157,6 +165,16 @@ function App() {
             }
           />
           <Route
+            path="/headmaster/view-results"
+            element={
+              <ProtectedRoute roles={ALL_ROLES}>
+                <DashboardLayout>
+                  <Suspense fallback={viewResultsFallback}><ViewResults /></Suspense>
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/headmaster/:page"
             element={
               <ProtectedRoute roles={['headmaster']}>
@@ -268,6 +286,16 @@ function App() {
             }
           />
           <Route
+            path="/academic/view-results"
+            element={
+              <ProtectedRoute roles={ALL_ROLES}>
+                <DashboardLayout>
+                  <Suspense fallback={viewResultsFallback}><ViewResults /></Suspense>
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/academic/:page"
             element={
               <ProtectedRoute roles={['academic']}>
@@ -304,6 +332,26 @@ function App() {
               <ProtectedRoute roles={['teacher']}>
                 <DashboardLayout>
                   <MarkEntry />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/teacher/view-results"
+            element={
+              <ProtectedRoute roles={ALL_ROLES}>
+                <DashboardLayout>
+                  <Suspense fallback={viewResultsFallback}><ViewResults /></Suspense>
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/teacher/comparison"
+            element={
+              <ProtectedRoute roles={['teacher']}>
+                <DashboardLayout>
+                  <Suspense fallback={comparisonFallback}><Comparison /></Suspense>
                 </DashboardLayout>
               </ProtectedRoute>
             }
