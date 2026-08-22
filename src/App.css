@@ -3741,3 +3741,10 @@ textarea:focus-visible {
 .comparison-summary h3 {
   margin-bottom: 4px;
 }
+
+.side-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: inherit;
+}

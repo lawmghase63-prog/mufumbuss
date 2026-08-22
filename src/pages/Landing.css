@@ -144,26 +144,34 @@
   padding: 130px 5% 90px;
   overflow: hidden;
   background:
-    radial-gradient(1000px 500px at 80% -10%, rgba(240, 180, 41, 0.16), transparent 60%),
-    linear-gradient(150deg, var(--green-900) 15%, var(--green-800) 55%, #116a38 100%);
+    radial-gradient(1100px 520px at 85% -10%, rgba(240, 180, 41, 0.18), transparent 60%),
+    radial-gradient(900px 620px at -15% 110%, rgba(14, 122, 60, 0.55), transparent 65%),
+    linear-gradient(150deg, #06231a 0%, var(--green-900) 45%, var(--green-800) 100%);
 }
 
 .land-hero::before {
   content: '';
   position: absolute;
   inset: 0;
-  background-image:
-    url('../assets/gallery/school-1.png');
-  background-size: cover;
-  background-position: center;
-  opacity: 0.22;
-  mix-blend-mode: luminosity;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30'%3E%3Ccircle cx='1.5' cy='1.5' r='1.5' fill='%23ffffff' fill-opacity='0.06'/%3E%3C/svg%3E");
+}
+
+.land-hero::after {
+  content: '';
+  position: absolute;
+  width: 480px;
+  height: 480px;
+  border-radius: 50%;
+  right: -140px;
+  bottom: -180px;
+  background: radial-gradient(circle at 35% 35%, rgba(240, 180, 41, 0.22), transparent 70%);
+  filter: blur(10px);
 }
 
 .hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(6, 35, 26, 0.25), rgba(6, 35, 26, 0.72) 82%);
+  background: linear-gradient(180deg, rgba(6, 35, 26, 0) 55%, rgba(6, 35, 26, 0.45));
 }
 
 .hero-content {
@@ -591,9 +599,15 @@
 .gallery-empty {
   text-align: center;
   color: var(--muted);
-  padding: 40px;
+  padding: 46px 40px;
   border: 2px dashed rgba(11, 94, 46, 0.25);
   border-radius: 18px;
+}
+
+.gallery-empty svg {
+  color: var(--green-800);
+  opacity: 0.6;
+  margin-bottom: 10px;
 }
 
 /* ---------- Joining steps ---------- */

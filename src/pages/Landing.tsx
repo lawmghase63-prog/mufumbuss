@@ -18,6 +18,7 @@ import {
   Sparkles,
   CheckCircle2,
   FileText,
+  Camera,
   Landmark,
 } from 'lucide-react'
 import logo from '../assets/logo.png'
@@ -318,6 +319,7 @@ export default function Landing() {
             </div>
           ) : (
             <div className="gallery-empty reveal">
+              <Camera size={30} />
               <p>School photos will be published here soon.</p>
             </div>
           )}
