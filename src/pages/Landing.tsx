@@ -20,7 +20,10 @@ import {
   FileText,
   Camera,
   Landmark,
+  Download,
 } from 'lucide-react'
+import { supabase } from '../lib/supabase'
+import type { JoiningDoc } from './JoiningInstructions'
 import logo from '../assets/logo.png'
 import './Landing.css'
 
@@ -94,6 +97,23 @@ const NAV_LINKS = [
 export default function Landing() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [docs, setDocs] = useState<JoiningDoc[]>([])
+
+  useEffect(() => {
+    let alive = true
+    supabase
+      .from('joining_instructions')
+      .select('*')
+      .order('level', { ascending: true })
+      .order('created_at', { ascending: false })
+      .then((res) => {
+        if (!alive || res.error) return
+        setDocs((res.data as JoiningDoc[]) ?? [])
+      })
+    return () => {
+      alive = false
+    }
+  }, [])
 
   useEffect(() => {
     function onScroll() {
@@ -336,6 +356,45 @@ export default function Landing() {
               Joining <em>instructions</em>
             </h2>
             <p>Four simple steps to join Mufumbu Secondary School.</p>
+          </div>
+
+          <div className="docs-block reveal">
+            <h3 className="docs-title">Official joining instruction documents</h3>
+            {docs.length > 0 ? (
+              <div className="docs-grid">
+                {docs.map((d) => (
+                  <a
+                    key={d.id}
+                    href={d.file_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="doc-card"
+                  >
+                    <span className={d.level === 'O' ? 'doc-icon o' : 'doc-icon a'}>
+                      <FileText size={20} />
+                    </span>
+                    <span className="doc-meta">
+                      <strong>{d.title}</strong>
+                      <small>
+                        {d.level === 'O' ? 'O-Level (Form 1–4)' : 'A-Level (Form 5–6)'}
+                        {d.size_bytes
+                          ? ` · ${d.size_bytes < 1048576 ? `${Math.round(d.size_bytes / 1024)} KB` : `${(d.size_bytes / 1048576).toFixed(1)} MB`}`
+                          : ''}
+                      </small>
+                    </span>
+                    <span className="doc-download">
+                      Download
+                      <Download size={15} />
+                    </span>
+                  </a>
+                ))}
+              </div>
+            ) : (
+              <p className="docs-empty">
+                Official joining instruction documents will be published here soon. In the
+                meantime, follow the steps below.
+              </p>
+            )}
           </div>
 
           <ol className="steps-grid">

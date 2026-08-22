@@ -26,6 +26,7 @@ const Sms = lazy(() => import('./pages/Sms'))
 const ViewResults = lazy(() => import('./pages/ViewResults'))
 const Comparison = lazy(() => import('./pages/Comparison'))
 const Landing = lazy(() => import('./pages/Landing'))
+const JoiningInstructions = lazy(() => import('./pages/JoiningInstructions'))
 
 const analysisFallback = (
   <div className="list-state">Loading analysis...</div>
@@ -183,6 +184,16 @@ function App() {
             }
           />
           <Route
+            path="/headmaster/joining-instructions"
+            element={
+              <ProtectedRoute roles={['headmaster']}>
+                <DashboardLayout>
+                  <Suspense fallback={smsFallback}><JoiningInstructions /></Suspense>
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/headmaster/:page"
             element={
               <ProtectedRoute roles={['headmaster']}>
@@ -299,6 +310,16 @@ function App() {
               <ProtectedRoute roles={ALL_ROLES}>
                 <DashboardLayout>
                   <Suspense fallback={viewResultsFallback}><ViewResults /></Suspense>
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/academic/joining-instructions"
+            element={
+              <ProtectedRoute roles={['academic']}>
+                <DashboardLayout>
+                  <Suspense fallback={smsFallback}><JoiningInstructions /></Suspense>
                 </DashboardLayout>
               </ProtectedRoute>
             }

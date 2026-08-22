@@ -18,6 +18,7 @@ import {
   Eye,
   TrendingUp,
   Globe,
+  FileUp,
   ChevronDown,
   type LucideIcon,
 } from 'lucide-react'
@@ -51,6 +52,7 @@ const NAV_SECTIONS: Record<Role, NavSection[]> = {
         { to: '/headmaster/reports', label: 'Reports', icon: FileText },
         { to: '/headmaster/view-results', label: 'View Results', icon: Eye },
         { to: '/headmaster/sms', label: 'SMS', icon: MessageSquare },
+        { to: '/headmaster/joining-instructions', label: 'Joining Instr.', icon: FileUp },
       ],
     },
   ],
@@ -68,6 +70,7 @@ const NAV_SECTIONS: Record<Role, NavSection[]> = {
         { to: '/academic/reports', label: 'Reports', icon: FileText },
         { to: '/academic/view-results', label: 'View Results', icon: Eye },
         { to: '/academic/sms', label: 'SMS', icon: MessageSquare },
+        { to: '/academic/joining-instructions', label: 'Joining Instr.', icon: FileUp },
       ],
     },
   ],

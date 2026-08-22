@@ -1,0 +1,131 @@
+/* ===== Joining Instructions admin page ===== */
+.ji-page {
+  display: grid;
+  gap: 18px;
+}
+
+.ji-upload-panel {
+  padding: 20px;
+}
+
+.ji-upload-form {
+  display: grid;
+  grid-template-columns: auto 1.2fr 1.6fr auto;
+  gap: 14px;
+  align-items: end;
+}
+
+.ji-field {
+  display: grid;
+  gap: 6px;
+}
+
+.ji-field select,
+.ji-field input[type='text'],
+.ji-field input[type='file'] {
+  border: 1px solid var(--border, #dde3e0);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 14px;
+  background: #fff;
+  color: inherit;
+}
+
+.ji-field input[type='text']:focus,
+.ji-field select:focus {
+  outline: none;
+  border-color: #0e7a3c;
+  box-shadow: 0 0 0 3px rgba(14, 122, 60, 0.15);
+}
+
+.ji-upload-btn {
+  white-space: nowrap;
+  height: 42px;
+}
+
+.ji-level-section {
+  padding: 20px;
+}
+
+.ji-doc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.ji-doc-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 16px;
+  border: 1px solid var(--border, #e4e9e6);
+  border-radius: 14px;
+  background: #fff;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.ji-doc-row:hover {
+  box-shadow: 0 10px 24px -14px rgba(10, 53, 39, 0.35);
+  transform: translateY(-1px);
+}
+
+.ji-doc-icon {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: rgba(11, 94, 46, 0.1);
+  color: #0b5e2e;
+}
+
+.ji-doc-icon.a {
+  background: rgba(240, 180, 41, 0.16);
+  color: #b07d00;
+}
+
+.ji-doc-meta {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.ji-doc-meta strong {
+  font-size: 14.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ji-doc-meta small {
+  font-size: 12.5px;
+  opacity: 0.65;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ji-doc-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 900px) {
+  .ji-upload-form {
+    grid-template-columns: 1fr 1fr;
+  }
+  .ji-upload-btn {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 560px) {
+  .ji-upload-form {
+    grid-template-columns: 1fr;
+  }
+}

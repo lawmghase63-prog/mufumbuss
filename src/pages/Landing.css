@@ -611,6 +611,104 @@
 }
 
 /* ---------- Joining steps ---------- */
+.docs-block {
+  margin-bottom: 34px;
+  background: #fff;
+  border-radius: 22px;
+  padding: 28px;
+  border: 1px solid rgba(11, 94, 46, 0.08);
+  box-shadow: 0 20px 44px -26px rgba(10, 53, 39, 0.35);
+}
+
+.docs-title {
+  font-size: 18px;
+  color: var(--green-950);
+  margin-bottom: 16px;
+}
+
+.docs-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.doc-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 15px 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(11, 94, 46, 0.12);
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s;
+  background: #fbfaf6;
+}
+
+.doc-card:hover {
+  border-color: var(--green-700);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px -14px rgba(11, 94, 46, 0.45);
+}
+
+.doc-icon {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+}
+
+.doc-icon.o {
+  background: rgba(11, 94, 46, 0.1);
+  color: var(--green-800);
+}
+
+.doc-icon.a {
+  background: rgba(240, 180, 41, 0.16);
+  color: var(--gold-dark);
+}
+
+.doc-meta {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.doc-meta strong {
+  font-size: 15px;
+  color: var(--green-950);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.doc-meta small {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.doc-download {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 16px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+  color: #241a02;
+  font-size: 13.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.docs-empty {
+  color: var(--muted);
+  font-size: 14.5px;
+  line-height: 1.6;
+}
+
 .steps-grid {
   list-style: none;
   padding: 0;
@@ -912,4 +1010,6 @@
   .steps-grid { grid-template-columns: 1fr; }
   .contact-grid { grid-template-columns: 1fr; }
   .footer-grid { grid-template-columns: 1fr; gap: 28px; }
+  .doc-card { flex-wrap: wrap; }
+  .doc-download { margin-left: 58px; }
 }
