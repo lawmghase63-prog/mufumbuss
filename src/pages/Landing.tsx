@@ -30,7 +30,7 @@ import './Landing.css'
 const CONTENT = {
   name: 'Mufumbu Secondary School',
   shortName: 'Mufumbu S.S.',
-  motto: 'Elimu ni Nguvu',
+  motto: 'Education Is a Key to Life',
   vision:
     'To be a centre of academic excellence that produces disciplined, knowledgeable and self-reliant graduates who serve their nation with integrity.',
   mission:
