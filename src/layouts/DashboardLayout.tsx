@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import {
-  GraduationCap,
   LayoutDashboard,
   Users,
   UserCog,
@@ -22,6 +21,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { useAuth } from '../lib/auth'
+import logo from '../assets/logo.png'
 import type { Role } from '../lib/types'
 
 interface NavItem {
@@ -151,7 +151,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       <aside className={open ? 'sidebar open' : 'sidebar'}>
         <div className="side-head">
           <div className="side-logo">
-            <GraduationCap size={22} />
+            <img src={logo} alt="School logo" />
           </div>
           <div className="side-brand">
             <span className="side-brand-title">Mufumbu S.S.</span>

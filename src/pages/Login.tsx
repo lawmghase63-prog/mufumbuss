@@ -1,7 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
-  GraduationCap,
   Mail,
   Lock,
   Eye,
@@ -15,6 +14,7 @@ import {
   ArrowRight,
 } from 'lucide-react'
 import { useAuth } from '../lib/auth'
+import logo from '../assets/logo.png'
 import './Login.css'
 
 const ROLE_ROUTES = {
@@ -66,7 +66,7 @@ export default function Login() {
           <div className="brand-glow" aria-hidden="true" />
           <div className="brand-top">
             <div className="brand-logo">
-              <GraduationCap size={30} />
+              <img src={logo} alt="Mufumbu Secondary School logo" />
             </div>
             <div className="brand-name">
               <span className="brand-title">Mufumbu</span>
