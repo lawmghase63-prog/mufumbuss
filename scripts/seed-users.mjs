@@ -22,6 +22,7 @@ const USERS = [
   { email: 'headmaster@mufumbu.ac.tz', password: 'Headmaster@123', fullName: 'Headmaster Mufumbu', role: 'headmaster' },
   { email: 'academic@mufumbu.ac.tz', password: 'Academic@123', fullName: 'Academic Officer', role: 'academic' },
   { email: 'teacher@mufumbu.ac.tz', password: 'Teacher@123', fullName: 'Teacher Demo', role: 'teacher' },
+  { email: 'erickgeofrey75@gmail.com', password: 'Academic@123', fullName: 'Erick Geofrey', role: 'academic' },
 ]
 
 const headers = {
