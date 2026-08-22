@@ -36,6 +36,32 @@
   background: radial-gradient(circle at 60% 40%, rgba(16, 185, 129, 0.16), transparent 70%);
 }
 
+/* ============ Home button ============ */
+.login-home-btn {
+  position: absolute;
+  top: 22px;
+  left: 22px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  border-radius: 999px;
+  background: rgba(6, 78, 59, 0.08);
+  border: 1px solid rgba(6, 78, 59, 0.18);
+  color: #064e3b;
+  font-size: 13.5px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.login-home-btn:hover {
+  background: #064e3b;
+  color: #fff;
+  transform: translateY(-1px);
+}
+
 /* ============ Shell (two-panel card) ============ */
 .login-shell {
   position: relative;

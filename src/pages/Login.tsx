@@ -12,6 +12,7 @@ import {
   Users,
   ClipboardList,
   ArrowRight,
+  Home,
 } from 'lucide-react'
 import { useAuth } from '../lib/auth'
 import logo from '../assets/logo.png'
@@ -60,6 +61,11 @@ export default function Login() {
     <div className="login-page">
       <div className="login-decor login-decor-a" />
       <div className="login-decor login-decor-b" />
+
+      <Link to="/" className="login-home-btn">
+        <Home size={16} />
+        <span>Home</span>
+      </Link>
 
       <div className="login-shell">
         <aside className="login-brand">
