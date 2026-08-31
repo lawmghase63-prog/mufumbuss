@@ -11,6 +11,7 @@ import {
   CheckCheck,
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import { paginate } from '../lib/paginate'
 import FlashMessage from '../components/FlashMessage'
 import type { Combination, Subject } from '../lib/subjects'
 import type { Form, Student } from '../lib/students'
@@ -50,7 +51,9 @@ export default function Assignments() {
           .order('admission_no', { ascending: true }),
         supabase.from('subjects').select('*').order('code', { ascending: true }),
         supabase.from('combinations').select('*').order('code', { ascending: true }),
-        supabase.from('student_subjects').select('*'),
+        paginate(async ({ from, to }) =>
+          supabase.from('student_subjects').select('*').range(from, to),
+        ),
         supabase.from('student_combinations').select('*'),
       ])
 

@@ -16,6 +16,7 @@ import {
   BarChart3,
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import { paginate } from '../lib/paginate'
 import StatCard from '../components/StatCard'
 import FlashMessage from '../components/FlashMessage'
 import ConfirmDialog from '../components/ConfirmDialog'
@@ -133,7 +134,9 @@ export default function Exams() {
     setProcessingId(exam.id)
     try {
       const [marksRes, studentsRes, subjectsRes] = await Promise.all([
-        supabase.from('exam_marks').select('*').eq('exam_id', exam.id),
+        paginate(async ({ from, to }) =>
+          supabase.from('exam_marks').select('*').eq('exam_id', exam.id).range(from, to),
+        ),
         supabase.from('students').select('id, form, status'),
         supabase.from('subjects').select('id, type'),
       ])

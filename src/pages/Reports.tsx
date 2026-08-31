@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { ArrowLeft, FileDown, Loader2 } from 'lucide-react'
 import type { jsPDF } from 'jspdf'
 import { supabase } from '../lib/supabase'
+import { paginate } from '../lib/paginate'
 import FlashMessage from '../components/FlashMessage'
 import { FORMS, type Form, type Student } from '../lib/students'
 import type { Combination, Subject, SubjectType } from '../lib/subjects'
@@ -308,7 +309,9 @@ async function buildPdf(
   ] = await Promise.all([
     supabase.from('students').select('*').eq('form', form).eq('status', 'active'),
     supabase.from('subjects').select('*'),
-    supabase.from('exam_marks').select('*').eq('exam_id', exam.id),
+    paginate(async ({ from, to }) =>
+      supabase.from('exam_marks').select('*').eq('exam_id', exam.id).range(from, to),
+    ),
     supabase.from('exam_results').select('*').eq('exam_id', exam.id).eq('form', form),
     supabase.from('combinations').select('*'),
     supabase.from('student_combinations').select('student_id, combination_id'),

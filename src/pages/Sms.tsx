@@ -8,6 +8,7 @@ import {
   AlertTriangle,
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import { paginate } from '../lib/paginate'
 import FlashMessage from '../components/FlashMessage'
 import ConfirmDialog from '../components/ConfirmDialog'
 import type { Exam, ExamMark } from '../lib/exams'
@@ -111,7 +112,9 @@ export default function Sms() {
       setSelected(new Set())
       const [examRes, marksRes, resultsRes] = await Promise.all([
         supabase.from('exams').select('*').eq('id', examId).maybeSingle(),
-        supabase.from('exam_marks').select('*').eq('exam_id', examId),
+        paginate(async ({ from, to }) =>
+          supabase.from('exam_marks').select('*').eq('exam_id', examId).range(from, to),
+        ),
         supabase
           .from('exam_results')
           .select('student_id, form, division')

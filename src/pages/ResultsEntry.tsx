@@ -8,6 +8,7 @@ import {
   UserX,
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import { paginate } from '../lib/paginate'
 import FlashMessage from '../components/FlashMessage'
 import type { Form, Student } from '../lib/students'
 import type { Subject, Combination } from '../lib/subjects'
@@ -46,7 +47,9 @@ export default function ResultsEntry() {
           .from('students')
           .select('id, admission_no, full_name, form, status')
           .eq('status', 'active'),
-        supabase.from('student_subjects').select('student_id, subject_id'),
+        paginate(async ({ from, to }) =>
+          supabase.from('student_subjects').select('student_id, subject_id').range(from, to),
+        ),
         supabase.from('combinations').select('*'),
         supabase.from('student_combinations').select('student_id, combination_id'),
       ])
@@ -169,11 +172,13 @@ export default function ResultsEntry() {
       setEntries(new Map())
       return
     }
-    supabase
-      .from('exam_marks')
-      .select('*')
-      .eq('exam_id', selectedExamId)
-      .then((res) => {
+    paginate(async ({ from, to }) =>
+      supabase
+        .from('exam_marks')
+        .select('*')
+        .eq('exam_id', selectedExamId)
+        .range(from, to),
+    ).then((res) => {
         const next = new Map<string, Entry>()
         ;(res.data as ExamMark[] | null)?.forEach((m) => {
           next.set(keyOf(m.student_id, m.subject_id), {
@@ -334,7 +339,9 @@ export default function ResultsEntry() {
         type: 'ok',
         text: `Saved ${rows.length} mark${rows.length === 1 ? '' : 's'} for ${selectedSubject.code} — Form ${selectedForm.slice(1)} (${exam.name}).`,
       })
-      const res = await supabase.from('exam_marks').select('*').eq('exam_id', exam.id)
+      const res = await paginate(async ({ from, to }) =>
+        supabase.from('exam_marks').select('*').eq('exam_id', exam.id).range(from, to),
+      )
       const next = new Map<string, Entry>()
       ;(res.data as ExamMark[] | null)?.forEach((m) => {
         next.set(keyOf(m.student_id, m.subject_id), {

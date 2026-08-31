@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import type { jsPDF } from 'jspdf'
 import { supabase } from '../lib/supabase'
+import { paginate } from '../lib/paginate'
 import FlashMessage from '../components/FlashMessage'
 import type { Exam, ExamMark, ResultLevel, Division } from '../lib/exams'
 import {
@@ -125,7 +126,9 @@ export default function Analysis() {
         await Promise.all([
           supabase.from('exams').select('*').eq('id', examId ?? '').maybeSingle(),
           supabase.from('students').select('*'),
-          supabase.from('exam_marks').select('*').eq('exam_id', examId ?? ''),
+          paginate(async ({ from, to }) =>
+            supabase.from('exam_marks').select('*').eq('exam_id', examId ?? '').range(from, to),
+          ),
           supabase
             .from('exam_results')
             .select('*')

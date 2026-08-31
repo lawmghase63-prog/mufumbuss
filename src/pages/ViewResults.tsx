@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Loader2, Eye, Database } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import { paginate } from '../lib/paginate'
 import FlashMessage from '../components/FlashMessage'
 import type { Exam, ExamMark, ResultLevel } from '../lib/exams'
 import {
@@ -95,7 +96,9 @@ export default function ViewResults() {
       setSelectedComboId('ALL')
       const [examRes, marksRes, resultsRes] = await Promise.all([
         supabase.from('exams').select('*').eq('id', examId).maybeSingle(),
-        supabase.from('exam_marks').select('*').eq('exam_id', examId),
+        paginate(async ({ from, to }) =>
+          supabase.from('exam_marks').select('*').eq('exam_id', examId).range(from, to),
+        ),
         supabase.from('exam_results').select('*').eq('exam_id', examId),
       ])
       if (!alive) return

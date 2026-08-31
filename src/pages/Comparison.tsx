@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Loader2, TrendingUp, TrendingDown, Minus, Printer, FileDown } from 'lucide-react'
 import type { jsPDF } from 'jspdf'
 import { supabase } from '../lib/supabase'
+import { paginate } from '../lib/paginate'
 import type { Exam, ExamMark } from '../lib/exams'
 import { subjectTotalMark } from '../lib/exams'
 import type { Student, Form } from '../lib/students'
@@ -130,8 +131,12 @@ export default function Comparison() {
       setComparing(true)
       setError(null)
       const [prevRes, currRes] = await Promise.all([
-        supabase.from('exam_marks').select('*').eq('exam_id', prevExamId),
-        supabase.from('exam_marks').select('*').eq('exam_id', currExamId),
+        paginate(async ({ from, to }) =>
+          supabase.from('exam_marks').select('*').eq('exam_id', prevExamId).range(from, to),
+        ),
+        paginate(async ({ from, to }) =>
+          supabase.from('exam_marks').select('*').eq('exam_id', currExamId).range(from, to),
+        ),
       ])
       if (!alive) return
       if (prevRes.error || currRes.error) {
