@@ -44,15 +44,6 @@ const NAV_SECTIONS: Record<Role, NavSection[]> = {
       items: [
         { to: '/headmaster', label: 'Overview', icon: LayoutDashboard },
         { to: '/headmaster/students', label: 'Students', icon: Users },
-        { to: '/headmaster/subjects', label: 'Subjects', icon: BookOpen },
-        { to: '/headmaster/assignments', label: 'Assignments', icon: CheckSquare },
-        { to: '/headmaster/teachers', label: 'Teachers', icon: UserCog },
-        { to: '/headmaster/exams', label: 'Exams', icon: CalendarCheck },
-        { to: '/headmaster/results', label: 'Results', icon: ClipboardList },
-        { to: '/headmaster/reports', label: 'Reports', icon: FileText },
-        { to: '/headmaster/view-results', label: 'View Results', icon: Eye },
-        { to: '/headmaster/sms', label: 'SMS', icon: MessageSquare },
-        { to: '/headmaster/joining-instructions', label: 'Joining Instr.', icon: FileUp },
       ],
     },
   ],
@@ -61,15 +52,36 @@ const NAV_SECTIONS: Record<Role, NavSection[]> = {
       title: 'Main',
       items: [
         { to: '/academic', label: 'Overview', icon: LayoutDashboard },
+      ],
+    },
+    {
+      title: 'School Management',
+      items: [
         { to: '/academic/students', label: 'Students', icon: Users },
         { to: '/academic/subjects', label: 'Subjects', icon: BookOpen },
         { to: '/academic/assignments', label: 'Assignments', icon: CheckSquare },
+      ],
+    },
+    {
+      title: 'Teachers Management',
+      items: [
         { to: '/academic/teachers', label: 'Teachers', icon: UserCog },
+      ],
+    },
+    {
+      title: 'Exam Management',
+      items: [
         { to: '/academic/exams', label: 'Exams', icon: CalendarCheck },
         { to: '/academic/results', label: 'Results Entry', icon: ClipboardList },
         { to: '/academic/reports', label: 'Reports', icon: FileText },
         { to: '/academic/view-results', label: 'View Results', icon: Eye },
+        { to: '/academic/comparison', label: 'Comparison', icon: TrendingUp },
         { to: '/academic/sms', label: 'SMS', icon: MessageSquare },
+      ],
+    },
+    {
+      title: 'Communication',
+      items: [
         { to: '/academic/joining-instructions', label: 'Joining Instr.', icon: FileUp },
       ],
     },
@@ -79,15 +91,21 @@ const NAV_SECTIONS: Record<Role, NavSection[]> = {
       title: 'Main',
       items: [{ to: '/teacher', label: 'Overview', icon: LayoutDashboard }],
     },
-  {
-    title: 'Teaching',
-    items: [
-      { to: '/teacher/my-classes', label: 'My Classes', icon: BookOpen },
-      { to: '/teacher/entry', label: 'Enter Results', icon: PenLine },
-      { to: '/teacher/view-results', label: 'View Results', icon: Eye },
-      { to: '/teacher/comparison', label: 'Comparison', icon: TrendingUp },
-    ],
-  },
+    {
+      title: 'Teaching',
+      items: [
+        { to: '/teacher/my-classes', label: 'My Classes', icon: BookOpen },
+        { to: '/teacher/entry', label: 'Enter Results', icon: PenLine },
+      ],
+    },
+    {
+      title: 'Exam Management',
+      items: [
+        { to: '/teacher/view-results', label: 'View Results', icon: Eye },
+        { to: '/teacher/reports', label: 'Reports', icon: FileText },
+        { to: '/teacher/comparison', label: 'Comparison', icon: TrendingUp },
+      ],
+    },
   ],
 }
 
@@ -101,6 +119,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const [accountOpen, setAccountOpen] = useState(false)
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({})
+  const role = user?.profile?.role
   const accountRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -133,8 +153,22 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     }
   }, [accountOpen])
 
+  useEffect(() => {
+    if (role) {
+      const initial: Record<string, boolean> = {}
+      NAV_SECTIONS[role].forEach((section) => {
+        initial[section.title] = true
+      })
+      setOpenGroups(initial)
+    }
+  }, [role])
+
+  const toggleGroup = (title: string) => {
+    setOpenGroups((prev) => ({ ...prev, [title]: !prev[title] }))
+  }
+
   if (!user?.profile) return null
-  const role = user.profile.role
+  const safeRole: Role = role ?? 'teacher'
   const displayName = user.profile.full_name || user.email
   const initials = displayName
     .split(/\s+/)
@@ -172,21 +206,32 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         </div>
 
         <nav className="side-nav">
-          {NAV_SECTIONS[role].map((section) => (
+          {NAV_SECTIONS[safeRole].map((section) => (
             <div className="nav-group" key={section.title}>
-              <span className="nav-group-title">{section.title}</span>
-              {section.items.map((item) => (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  className={({ isActive }) =>
-                    isActive ? 'side-link active' : 'side-link'
-                  }
-                >
-                  <item.icon size={18} className="side-link-icon" />
-                  <span className="side-link-label">{item.label}</span>
-                </NavLink>
-              ))}
+              <button
+                type="button"
+                className="nav-group-title"
+                onClick={() => toggleGroup(section.title)}
+              >
+                <span>{section.title}</span>
+                <ChevronDown
+                  size={14}
+                  className={`group-chevron ${openGroups[section.title] ? 'open' : ''}`}
+                />
+              </button>
+              {openGroups[section.title] &&
+                section.items.map((item) => (
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    className={({ isActive }) =>
+                      isActive ? 'side-link active' : 'side-link'
+                    }
+                  >
+                    <item.icon size={18} className="side-link-icon" />
+                    <span className="side-link-label">{item.label}</span>
+                  </NavLink>
+                ))}
             </div>
           ))}
 
@@ -213,7 +258,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             <span className="avatar">{initials}</span>
             <div className="user-meta">
               <span className="user-name">{displayName}</span>
-              <span className="role-badge">{roleTitle(role)}</span>
+              <span className="role-badge">{roleTitle(safeRole)}</span>
             </div>
           </Link>
           <button type="button" className="signout-btn" onClick={signOut}>

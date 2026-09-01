@@ -187,12 +187,33 @@
 }
 
 .nav-group-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 12px;
+  margin: 0;
+  border: none;
+  background: none;
+  color: #6ee7b7;
   font-size: 0.64rem;
   font-weight: 700;
   letter-spacing: 1.3px;
   text-transform: uppercase;
-  color: #6ee7b7;
-  padding: 0 12px 5px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.nav-group-title:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.group-chevron {
+  transition: transform 0.2s;
+}
+
+.group-chevron.open {
+  transform: rotate(180deg);
 }
 
 .side-link {
@@ -1723,6 +1744,316 @@
 
 .mark-save-bar .signin-btn {
   padding: 11px 20px;
+}
+
+/* ---------- Marks entry summary panel ---------- */
+
+.marks-summary-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.marks-summary-head h3 {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--text-h);
+}
+
+.marks-summary-stats {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ms-stat {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.ms-stat.complete {
+  color: #047857;
+  background: rgba(4, 120, 87, 0.1);
+}
+
+.ms-stat.partial {
+  color: #b45309;
+  background: rgba(245, 158, 11, 0.12);
+}
+
+.ms-stat.pending {
+  color: #6b7280;
+  background: #f3f4f6;
+}
+
+.subject-code-badge {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #4338ca;
+  background: rgba(67, 56, 202, 0.08);
+  border-radius: 6px;
+  padding: 3px 8px;
+  white-space: nowrap;
+}
+
+.subject-name-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.progress-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.progress-bar-track {
+  flex: 1;
+  height: 7px;
+  background: #f1eff5;
+  border-radius: 999px;
+  overflow: hidden;
+  min-width: 60px;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.progress-bar-fill.complete {
+  background: #047857;
+}
+
+.progress-bar-fill.partial {
+  background: #f59e0b;
+}
+
+.progress-bar-fill.none {
+  background: #d1d5db;
+}
+
+.progress-pct {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text);
+  min-width: 32px;
+  text-align: right;
+}
+
+.status-pill {
+  display: inline-block;
+  font-size: 0.66rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.status-pill.complete {
+  color: #047857;
+  background: rgba(4, 120, 87, 0.1);
+}
+
+.status-pill.partial {
+  color: #b45309;
+  background: rgba(245, 158, 11, 0.12);
+}
+
+.status-pill.none {
+  color: #6b7280;
+  background: #f3f4f6;
+}
+
+/* ---------- View marks entry (academic/head) ---------- */
+.marks-overview-panel {
+  margin-bottom: 20px;
+}
+
+.marks-overview-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.marks-overview-head h3 {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--text-h);
+}
+
+.marks-overview-stats {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.marks-overview-table .num-col {
+  width: 70px;
+  text-align: center;
+}
+
+.teacher-name-cell {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-h);
+  white-space: nowrap;
+}
+
+.no-teacher {
+  color: #b6b3bd;
+  font-weight: 500;
+}
+
+.marks-grid-panel {
+  margin-bottom: 20px;
+}
+
+.marks-grid-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.marks-grid-head h3 {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--text-h);
+}
+
+.marks-grid-count {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text);
+  background: #f1eff5;
+  border-radius: 999px;
+  padding: 3px 10px;
+}
+
+.marks-grid-scroll {
+  max-height: 560px;
+  overflow: auto;
+}
+
+.marks-grid-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: max-content;
+}
+
+.marks-grid-table th,
+.marks-grid-table td {
+  border-bottom: 1px solid #efecef;
+  text-align: center;
+  padding: 6px 8px;
+}
+
+.marks-grid-table thead th {
+  position: sticky;
+  top: 0;
+  background: #faf9fc;
+  z-index: 2;
+}
+
+.marks-grid-table .sticky-col {
+  position: sticky;
+  left: 0;
+  background: #faf9fc;
+  z-index: 3;
+  text-align: left;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.marks-grid-table thead th.sticky-col {
+  z-index: 4;
+}
+
+.marks-grid-table .row-num {
+  width: 40px;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  color: var(--text);
+  background: #faf9fc;
+}
+
+.marks-grid-table .name-col {
+  min-width: 220px;
+  background: #faf9fc;
+}
+
+.marks-grid-table tbody td.sticky-col {
+  background: #fff;
+}
+
+.subj-col {
+  min-width: 70px;
+}
+
+.grid-subj-code {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #4338ca;
+}
+
+.mark-cell {
+  font-family: var(--mono);
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--text-h);
+}
+
+.mark-cell.filled {
+  color: #047857;
+  background: rgba(4, 120, 87, 0.06);
+  border-radius: 6px;
+}
+
+.mark-cell.absent {
+  color: #b45309;
+  background: rgba(245, 158, 11, 0.1);
+  border-radius: 6px;
+  font-size: 0.68rem;
+}
+
+.mark-cell.empty {
+  color: #c6c3cc;
+}
+
+.mark-dash {
+  color: #c6c3cc;
+  font-weight: 500;
+}
+
+.student-avatar-sm {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(135deg, #047857, #065f46);
+  border-radius: 8px;
 }
 
 .row-grad td {
@@ -3747,4 +4078,24 @@ textarea:focus-visible {
   height: 100%;
   object-fit: contain;
   border-radius: inherit;
+}
+
+@media (max-width: 640px) {
+  .marks-overview-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .marks-overview-stats {
+    gap: 5px;
+  }
+
+  .marks-grid-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .marks-grid-table .name-col {
+    min-width: 180px;
+  }
 }

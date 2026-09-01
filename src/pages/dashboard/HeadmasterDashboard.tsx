@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Users, UserCog, ClipboardList, BarChart3, ArrowRight } from 'lucide-react'
+import { Users } from 'lucide-react'
 import { useAuth } from '../../lib/auth'
 import { supabase } from '../../lib/supabase'
 import StatCard from '../../components/StatCard'
@@ -60,10 +60,6 @@ export default function HeadmasterDashboard() {
               <Users size={17} />
               View Students
             </Link>
-            <Link to="/headmaster/results" className="action-btn">
-              <ClipboardList size={17} />
-              Recent Results
-            </Link>
           </div>
         </div>
       </section>
@@ -73,24 +69,6 @@ export default function HeadmasterDashboard() {
         <StatCard label="Teachers" value={stats.teachers} />
         <StatCard label="Subjects" value={stats.subjects} />
         <StatCard label="Classes" value={stats.classes} />
-      </section>
-
-      <section className="panel">
-        <h3>Quick Access</h3>
-        <p className="muted">
-          Student, teacher and results modules will be built in the coming steps.
-        </p>
-        <div className="quick-actions">
-          <Link to="/headmaster/teachers" className="action-btn">
-            <UserCog size={17} />
-            Manage Teachers
-          </Link>
-          <Link to="/headmaster/reports" className="action-btn">
-            <BarChart3 size={17} />
-            View Reports
-            <ArrowRight size={16} />
-          </Link>
-        </div>
       </section>
     </>
   )

@@ -68,7 +68,16 @@ interface SubjectPerf {
 
 const DIV_KEYS: Division[] = ['I', 'II', 'III', 'IV', '0']
 
-function competencyLabel(avg: number): string {
+function competencyLabel(avg: number, level: ResultLevel): string {
+  if (level === 'a') {
+    if (avg >= 80) return 'Excellent'
+    if (avg >= 70) return 'Very Good'
+    if (avg >= 60) return 'Good'
+    if (avg >= 50) return 'Satisfactory'
+    if (avg >= 40) return 'Satisfactory (Pass)'
+    if (avg >= 35) return 'Subsidiary Pass'
+    return 'Fail'
+  }
   if (avg >= 75) return 'Excellent'
   if (avg >= 65) return 'Very Good'
   if (avg >= 45) return 'Good'
@@ -234,7 +243,7 @@ export default function Analysis() {
       const counts = gradeCounts.get(m.subject_id) ?? {}
       counts[grade] = (counts[grade] ?? 0) + 1
       gradeCounts.set(m.subject_id, counts)
-      if (total >= 45) {
+      if (total >= (level === 'a' ? 35 : 45)) {
         passBySubject.set(m.subject_id, (passBySubject.get(m.subject_id) ?? 0) + 1)
       }
       pointsSumBySubject.set(
@@ -259,7 +268,7 @@ export default function Analysis() {
         avg,
         grade: sat > 0 ? gradeForMark(avg, gradeScaleOf(s.type)) ?? 'F' : '-',
         gpa: sat > 0 ? (pointsSumBySubject.get(s.id) ?? 0) / sat : 0,
-        competency: competencyLabel(avg),
+        competency: competencyLabel(avg, gradeScaleOf(s.type)),
         counts: gradeCounts.get(s.id) ?? {},
       })
     }

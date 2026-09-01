@@ -62,11 +62,20 @@ function gradeForMark(mark) {
   return 'F'
 }
 
-function oLevelDivision(dBelow) {
-  if (dBelow <= 1) return 'I'
-  if (dBelow <= 3) return 'II'
-  if (dBelow === 4) return 'III'
-  if (dBelow === 5) return 'IV'
+function pointsForMark(mark) {
+  const g = gradeForMark(mark)
+  if (g === 'A') return 1
+  if (g === 'B') return 2
+  if (g === 'C') return 3
+  if (g === 'D') return 4
+  return 5
+}
+
+function oLevelDivision(points) {
+  if (points <= 17) return 'I'
+  if (points <= 21) return 'II'
+  if (points <= 25) return 'III'
+  if (points <= 33) return 'IV'
   return '0'
 }
 
@@ -161,17 +170,18 @@ async function main() {
       .filter((r) => r.total != null)
     if (totals.length === 0) continue
     const best = [...totals].sort((a, b) => b.total - a.total).slice(0, 7)
+    const points = best.reduce((sum, s) => sum + pointsForMark(s.total), 0)
     const dBelow = best.filter((s) => gradeForMark(s.total) === 'D' || gradeForMark(s.total) === 'F').length
     rows.push({
       exam_id: examId,
       student_id: st.id,
       form: st.form,
       level: 'o',
-      division: oLevelDivision(dBelow),
+      division: oLevelDivision(points),
       subjects_used: totals.length,
       best_count: best.length,
       d_below: dBelow,
-      total_points: 0,
+      total_points: points,
     })
   }
   await req(

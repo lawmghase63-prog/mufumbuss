@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Loader2, TrendingUp, TrendingDown, Minus, Printer, FileDown } from 'lucide-react'
 import type { jsPDF } from 'jspdf'
 import { supabase } from '../lib/supabase'
+import { useAuth } from '../lib/auth'
 import { paginate } from '../lib/paginate'
 import type { Exam, ExamMark } from '../lib/exams'
 import { subjectTotalMark } from '../lib/exams'
@@ -9,6 +10,7 @@ import type { Student, Form } from '../lib/students'
 import { FORMS } from '../lib/students'
 import type { Subject } from '../lib/subjects'
 import type { Combination } from '../lib/subjects'
+import type { Teacher } from '../lib/teachers'
 
 interface SchoolSettings {
   id: string
@@ -51,6 +53,7 @@ function pct(deltaPct: number | null): string {
 }
 
 export default function Comparison() {
+  const { user } = useAuth()
   const [loading, setLoading] = useState(true)
   const [comparing, setComparing] = useState(false)
   const [exams, setExams] = useState<Exam[]>([])
@@ -58,6 +61,9 @@ export default function Comparison() {
   const [subjects, setSubjects] = useState<Subject[]>([])
   const [combinations, setCombinations] = useState<Combination[]>([])
   const [studentCombinations, setStudentCombinations] = useState<StudentCombination[]>([])
+  const [teacher, setTeacher] = useState<Teacher | null>(null)
+  const [teacherSubjectIds, setTeacherSubjectIds] = useState<Set<string>>(new Set())
+  const [teacherForms, setTeacherForms] = useState<Set<Form>>(new Set())
 
   const [selectedForm, setSelectedForm] = useState<Form | 'ALL'>('ALL')
   const [selectedComboId, setSelectedComboId] = useState<string | 'ALL'>('ALL')
@@ -71,11 +77,13 @@ export default function Comparison() {
 
   const [error, setError] = useState<string | null>(null)
 
+  const isTeacher = user?.profile?.role === 'teacher'
+
   useEffect(() => {
     let alive = true
     async function load() {
       setLoading(true)
-      const [examsRes, studsRes, subjRes, combosRes, scRes, settingsRes] = await Promise.all([
+      const base = await Promise.all([
         supabase.from('exams').select('*').order('start_date', { ascending: false }),
         supabase.from('students').select('*'),
         supabase.from('subjects').select('*'),
@@ -84,28 +92,69 @@ export default function Comparison() {
         supabase.from('school_settings').select('*').maybeSingle(),
       ])
       if (!alive) return
+      const [examsRes, studsRes, subjRes, combosRes, scRes, settingsRes] = base
       if (!examsRes.error) setExams((examsRes.data as Exam[]) ?? [])
       setStudents(((studsRes.data as Student[]) ?? []).filter((s) => s.status === 'active'))
       setSubjects((subjRes.data as Subject[]) ?? [])
       setCombinations((combosRes.data as Combination[]) ?? [])
       setStudentCombinations((scRes.data as StudentCombination[]) ?? [])
       setSettings((settingsRes.data as SchoolSettings) ?? null)
+
+      if (isTeacher && user) {
+        const teacherRes = await supabase
+          .from('teachers')
+          .select('*')
+          .eq('user_id', user.id)
+        const myTeacher = (teacherRes.data as Teacher[] | null)?.[0] ?? null
+        setTeacher(myTeacher)
+        if (myTeacher) {
+          const assignRes = await supabase
+            .from('teacher_assignments')
+            .select('*')
+            .eq('teacher_id', myTeacher.id)
+          const assignments = (assignRes.data ?? []) as {
+            subject_id: string
+            form: Form
+          }[]
+          setTeacherSubjectIds(new Set(assignments.map((a) => a.subject_id)))
+          setTeacherForms(new Set(assignments.map((a) => a.form)))
+        }
+      }
       setLoading(false)
     }
     load()
     return () => {
       alive = false
     }
-  }, [])
+  }, [isTeacher, user])
 
   const availableForms = useMemo<Form[]>(() => {
+    if (isTeacher) {
+      const present = new Set(students.map((s) => s.form))
+      return FORMS.filter((f) => present.has(f) && teacherForms.has(f))
+    }
     const present = new Set(students.map((s) => s.form))
     return FORMS.filter((f) => present.has(f))
-  }, [students])
+  }, [students, isTeacher, teacherForms])
+
+  const availableSubjects = useMemo<Subject[]>(() => {
+    if (!isTeacher) return subjects
+    return subjects.filter((s) => teacherSubjectIds.has(s.id))
+  }, [subjects, isTeacher, teacherSubjectIds])
+
+  const scopeMarks = (marksList: ExamMark[]) => {
+    if (!isTeacher) return marksList
+    const ids = teacherSubjectIds
+    if (ids.size === 0) return []
+    return marksList.filter((m) => ids.has(m.subject_id))
+  }
 
   const scopedStudents = useMemo(() => {
     let list =
       selectedForm === 'ALL' ? students : students.filter((s) => s.form === selectedForm)
+    if (isTeacher && selectedForm === 'ALL') {
+      list = list.filter((s) => teacherForms.has(s.form))
+    }
     if ((selectedForm === 'F5' || selectedForm === 'F6') && selectedComboId !== 'ALL') {
       const ids = new Set(
         studentCombinations
@@ -115,9 +164,16 @@ export default function Comparison() {
       list = list.filter((s) => ids.has(s.id))
     }
     return list
-  }, [students, selectedForm, selectedComboId, studentCombinations])
+  }, [students, selectedForm, selectedComboId, studentCombinations, isTeacher, teacherForms])
 
   const bothSelected = !!(prevExamId && currExamId && prevExamId !== currExamId)
+
+  const poolExams = useMemo<Exam[]>(() => {
+    if (!isTeacher || teacherForms.size === 0) return exams
+    return exams.filter((e) => e.forms.some((f) => teacherForms.has(f as Form)))
+  }, [exams, isTeacher, teacherForms])
+
+  const formList = (forms: string[]) => (forms.length > 0 ? forms.join(' · ') : '')
 
   useEffect(() => {
     if (!bothSelected) {
@@ -192,10 +248,10 @@ export default function Comparison() {
   const subjectComparison = useMemo<SubjectCompare[]>(() => {
     if (!bothSelected || comparing) return []
     const ids = new Set(scopedStudents.map((s) => s.id))
-    const pAvg = avgBySubject(prevMarks, ids)
-    const cAvg = avgBySubject(currMarks, ids)
+    const pAvg = avgBySubject(scopeMarks(prevMarks), ids)
+    const cAvg = avgBySubject(scopeMarks(currMarks), ids)
     const out: SubjectCompare[] = []
-    for (const sub of subjects) {
+    for (const sub of availableSubjects) {
       const p = pAvg.get(sub.id)
       const c = cAvg.get(sub.id)
       if (!p || !c) continue
@@ -212,13 +268,14 @@ export default function Comparison() {
     }
     out.sort((a, b) => (b.deltaPct ?? -Infinity) - (a.deltaPct ?? -Infinity))
     return out
-  }, [bothSelected, comparing, scopedStudents, prevMarks, currMarks, subjects])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bothSelected, comparing, scopedStudents, prevMarks, currMarks, availableSubjects])
 
   const studentComparison = useMemo<StudentCompare[]>(() => {
     if (!bothSelected || comparing) return []
     const ids = new Set(scopedStudents.map((s) => s.id))
-    const pAvg = avgByStudent(prevMarks, ids)
-    const cAvg = avgByStudent(currMarks, ids)
+    const pAvg = avgByStudent(scopeMarks(prevMarks), ids)
+    const cAvg = avgByStudent(scopeMarks(currMarks), ids)
     const byName = new Map(students.map((s) => [s.id, s.full_name]))
     const out: StudentCompare[] = []
     for (const [id, pa] of pAvg) {
@@ -244,11 +301,29 @@ export default function Comparison() {
   const prevExam = exams.find((e) => e.id === prevExamId)
   const currExam = exams.find((e) => e.id === currExamId)
 
+  function matchesScope(ex: Exam, other: Exam | undefined, form: Form | 'ALL'): boolean {
+    if (form !== 'ALL' && !ex.forms.includes(form)) return false
+    if (form === 'ALL' && other) {
+      const a = [...ex.forms].sort()
+      const b = [...other.forms].sort()
+      if (a.length !== b.length || a.some((f, i) => f !== b[i])) return false
+    }
+    return true
+  }
+
+  const prevOptions = poolExams.filter((ex) => matchesScope(ex, currExam, selectedForm))
+  const currOptions = poolExams.filter((ex) => matchesScope(ex, prevExam, selectedForm))
+
   const GREEN: [number, number, number] = [11, 61, 46]
   const PAGE_W = 210
 
   function scopeLabel(): string {
-    const base = selectedForm === 'ALL' ? 'All Classes' : formLabel(selectedForm)
+    const base =
+      selectedForm === 'ALL'
+        ? isTeacher
+          ? 'All my classes'
+          : 'All Classes'
+        : formLabel(selectedForm)
     if ((selectedForm === 'F5' || selectedForm === 'F6') && selectedComboId !== 'ALL') {
       return `${base} ${combinations.find((c) => c.id === selectedComboId)?.code ?? ''}`.trim()
     }
@@ -399,6 +474,21 @@ export default function Comparison() {
     )
   }
 
+  if (isTeacher && !teacher) {
+    return (
+      <div className="list-state">Your account is not linked to a teacher record yet.</div>
+    )
+  }
+
+  if (isTeacher && teacherSubjectIds.size === 0) {
+    return (
+      <div className="list-state">
+        No subjects assigned to you yet. Ask the Headmaster or Academic Officer to assign your
+        teaching subjects.
+      </div>
+    )
+  }
+
   return (
     <div className="comparison-page">
       <header className="page-head no-print">
@@ -414,9 +504,11 @@ export default function Comparison() {
             onClick={() => {
               setSelectedForm('ALL')
               setSelectedComboId('ALL')
+              setPrevExamId('')
+              setCurrExamId('')
             }}
           >
-            All classes
+            {isTeacher ? 'All my classes' : 'All classes'}
           </button>
           {availableForms.map((f) => (
             <button
@@ -426,6 +518,8 @@ export default function Comparison() {
               onClick={() => {
                 setSelectedForm(f)
                 setSelectedComboId('ALL')
+                setPrevExamId('')
+                setCurrExamId('')
               }}
             >
               {formLabel(f)}
@@ -455,14 +549,20 @@ export default function Comparison() {
           </div>
         )}
 
+        <p className="sms-hint">
+          {selectedForm === 'ALL'
+            ? 'Both exams must be for the same set of classes.'
+            : `Both exams must include ${formLabel(selectedForm)}.`}
+        </p>
+
         <div className="sms-controls-row">
           <div className="field sms-exam-field">
             <label>Previous exam</label>
             <select value={prevExamId} onChange={(e) => setPrevExamId(e.target.value)}>
               <option value="">— Select previous exam —</option>
-              {exams.map((ex) => (
+              {prevOptions.map((ex) => (
                 <option key={ex.id} value={ex.id}>
-                  {ex.name}
+                  {formList(ex.forms) ? `${ex.name} (${formList(ex.forms)})` : ex.name}
                 </option>
               ))}
             </select>
@@ -471,9 +571,9 @@ export default function Comparison() {
             <label>Current exam</label>
             <select value={currExamId} onChange={(e) => setCurrExamId(e.target.value)}>
               <option value="">— Select current exam —</option>
-              {exams.map((ex) => (
+              {currOptions.map((ex) => (
                 <option key={ex.id} value={ex.id}>
-                  {ex.name}
+                  {formList(ex.forms) ? `${ex.name} (${formList(ex.forms)})` : ex.name}
                 </option>
               ))}
             </select>

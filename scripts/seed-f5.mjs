@@ -105,11 +105,11 @@ const rand = mulberry32(20260818)
 const ri = (min, max) => Math.floor(rand() * (max - min + 1)) + min
 
 function gradeForMark(mark) {
-  if (mark >= 81) return 'A'
+  if (mark >= 80) return 'A'
   if (mark >= 70) return 'B'
   if (mark >= 60) return 'C'
   if (mark >= 50) return 'D'
-  if (mark >= 45) return 'E'
+  if (mark >= 40) return 'E'
   if (mark >= 35) return 'S'
   return 'F'
 }
@@ -117,9 +117,9 @@ function gradeForMark(mark) {
 const A_LEVEL_POINTS = { A: 1, B: 2, C: 3, D: 4, E: 5, S: 6, F: 7 }
 
 function aLevelDivision(points) {
-  if (points <= 7) return 'I'
+  if (points <= 9) return 'I'
   if (points <= 12) return 'II'
-  if (points <= 16) return 'III'
+  if (points <= 17) return 'III'
   if (points <= 19) return 'IV'
   return '0'
 }

@@ -83,112 +83,12 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route
+<Route
             path="/headmaster/students"
             element={
               <ProtectedRoute roles={['headmaster']}>
                 <DashboardLayout>
                   <Students />
-                </DashboardLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/headmaster/subjects"
-            element={
-              <ProtectedRoute roles={['headmaster']}>
-                <DashboardLayout>
-                  <Subjects />
-                </DashboardLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/headmaster/assignments"
-            element={
-              <ProtectedRoute roles={['headmaster']}>
-                <DashboardLayout>
-                  <Assignments />
-                </DashboardLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/headmaster/teachers"
-            element={
-              <ProtectedRoute roles={['headmaster']}>
-                <DashboardLayout>
-                  <Teachers />
-                </DashboardLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/headmaster/exams"
-            element={
-              <ProtectedRoute roles={['headmaster']}>
-                <DashboardLayout>
-                  <Exams />
-                </DashboardLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/headmaster/results"
-            element={
-              <ProtectedRoute roles={['headmaster']}>
-                <DashboardLayout>
-                  <ResultsEntry />
-                </DashboardLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/headmaster/reports"
-            element={
-              <ProtectedRoute roles={['headmaster']}>
-                <DashboardLayout>
-                  <Suspense fallback={reportsFallback}><Reports /></Suspense>
-                </DashboardLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/headmaster/analysis/:examId"
-            element={
-              <ProtectedRoute roles={['headmaster']}>
-                <DashboardLayout>
-                  <Suspense fallback={analysisFallback}><Analysis /></Suspense>
-                </DashboardLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/headmaster/sms"
-            element={
-              <ProtectedRoute roles={['headmaster']}>
-                <DashboardLayout>
-                  <Suspense fallback={smsFallback}><Sms /></Suspense>
-                </DashboardLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/headmaster/view-results"
-            element={
-              <ProtectedRoute roles={ALL_ROLES}>
-                <DashboardLayout>
-                  <Suspense fallback={viewResultsFallback}><ViewResults /></Suspense>
-                </DashboardLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/headmaster/joining-instructions"
-            element={
-              <ProtectedRoute roles={['headmaster']}>
-                <DashboardLayout>
-                  <Suspense fallback={smsFallback}><JoiningInstructions /></Suspense>
                 </DashboardLayout>
               </ProtectedRoute>
             }
@@ -325,6 +225,16 @@ function App() {
             }
           />
           <Route
+            path="/academic/comparison"
+            element={
+              <ProtectedRoute roles={['academic']}>
+                <DashboardLayout>
+                  <Suspense fallback={comparisonFallback}><Comparison /></Suspense>
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/academic/:page"
             element={
               <ProtectedRoute roles={['academic']}>
@@ -371,6 +281,16 @@ function App() {
               <ProtectedRoute roles={ALL_ROLES}>
                 <DashboardLayout>
                   <Suspense fallback={viewResultsFallback}><ViewResults /></Suspense>
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/teacher/reports"
+            element={
+              <ProtectedRoute roles={['teacher']}>
+                <DashboardLayout>
+                  <Suspense fallback={reportsFallback}><Reports /></Suspense>
                 </DashboardLayout>
               </ProtectedRoute>
             }
