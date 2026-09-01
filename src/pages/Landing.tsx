@@ -25,6 +25,8 @@ import {
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import type { JoiningDoc } from './JoiningInstructions'
+import type { Subject, Combination } from '../lib/subjects'
+import { subjectName } from '../lib/subjects'
 import logo from '../assets/logo.png'
 import './Landing.css'
 
@@ -95,23 +97,32 @@ const NAV_LINKS = [
   { href: '#contact', label: 'Contact' },
 ]
 
+const O_FORMS = ['F1', 'F2', 'F3', 'F4'] as const
+
 export default function Landing() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [docs, setDocs] = useState<JoiningDoc[]>([])
   const [showBanner, setShowBanner] = useState(true)
+  const [subjects, setSubjects] = useState<Subject[]>([])
+  const [combinations, setCombinations] = useState<Combination[]>([])
 
   useEffect(() => {
     let alive = true
-    supabase
-      .from('joining_instructions')
-      .select('*')
-      .order('level', { ascending: true })
-      .order('created_at', { ascending: false })
-      .then((res) => {
-        if (!alive || res.error) return
-        setDocs((res.data as JoiningDoc[]) ?? [])
-      })
+    Promise.all([
+      supabase
+        .from('joining_instructions')
+        .select('*')
+        .order('level', { ascending: true })
+        .order('created_at', { ascending: false }),
+      supabase.from('subjects').select('*'),
+      supabase.from('combinations').select('*').order('code', { ascending: true }),
+    ]).then(([docsRes, subjRes, combosRes]) => {
+      if (!alive) return
+      if (!docsRes.error) setDocs((docsRes.data as JoiningDoc[]) ?? [])
+      if (!subjRes.error) setSubjects((subjRes.data as Subject[]) ?? [])
+      if (!combosRes.error) setCombinations((combosRes.data as Combination[]) ?? [])
+    })
     return () => {
       alive = false
     }
@@ -150,6 +161,19 @@ export default function Landing() {
       .map((m) => m.default)
       .slice(0, 8)
   }, [])
+
+  const oSubjectsByForm = useMemo<Record<string, Subject[]>>(() => {
+    const out: Record<string, Subject[]> = {}
+    for (const f of O_FORMS) {
+      out[f] = subjects
+        .filter((s) => s.type === 'o' && s.forms?.includes(f))
+        .sort((a, b) => a.code.localeCompare(b.code))
+    }
+    return out
+  }, [subjects])
+
+  const anySubjects = subjects.length > 0
+  const anyCombos = combinations.length > 0
 
   return (
     <div className="land">
@@ -305,32 +329,81 @@ export default function Landing() {
               Two levels, one <em>standard of excellence</em>
             </h2>
           </div>
+
           <div className="acad-grid">
             <article className="acad-card reveal">
               <span className="acad-badge">O-Level</span>
               <h3>Ordinary Level (Form 1 – 4)</h3>
               <p>
-                Core sciences, business and arts subjects taught by qualified and committed
-                teachers, following the national curriculum with continuous assessment.
+                Subjects offered across each form, taught by qualified and committed
+                teachers following the national curriculum with continuous assessment.
               </p>
-              <ul>
-                <li>Science combinations foundation</li>
-                <li>Practical laboratory sessions</li>
-                <li>Counselling &amp; guidance programme</li>
-              </ul>
+              {anySubjects ? (
+                <div className="subject-forms">
+                  {O_FORMS.map((f) => (
+                    <div className="subject-form" key={f}>
+                      <h4>Form {f.slice(1)}</h4>
+                      <div className="subject-chips">
+                        {(oSubjectsByForm[f] ?? []).length > 0 ? (
+                          oSubjectsByForm[f].map((s) => (
+                            <span className="subject-chip" key={s.id} title={s.name}>
+                              {s.code}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="subject-chip empty">—</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <ul>
+                  <li>Core sciences, business and arts subjects</li>
+                  <li>Practical laboratory sessions</li>
+                  <li>Counselling &amp; guidance programme</li>
+                </ul>
+              )}
             </article>
+
             <article className="acad-card reveal">
               <span className="acad-badge gold">A-Level</span>
               <h3>Advanced Level (Form 5 – 6)</h3>
               <p>
-                Specialised subject combinations (e.g. PCM, PCB, HGL &amp; more) that prepare
-                students for higher learning institutions in Tanzania and beyond.
+                Specialist subject combinations that prepare students for higher learning
+                institutions in Tanzania and beyond.
               </p>
-              <ul>
-                <li>Focused combination teaching</li>
-                <li>Intensive exam preparation</li>
-                <li>Career &amp; university guidance</li>
-              </ul>
+              {anyCombos ? (
+                <div className="combo-list">
+                  {combinations.map((c) => (
+                    <div className="combo-item" key={c.id}>
+                      <span className="combo-code">{c.code}</span>
+                      <span className="combo-desc">
+                        {c.core_subjects
+                          .map((code) => subjectName(subjects, code))
+                          .join(', ')}
+                        {c.subsidiary_subjects.length > 0 && (
+                          <>
+                            {' '}
+                            <small>
+                              +{' '}
+                              {c.subsidiary_subjects
+                                .map((code) => subjectName(subjects, code))
+                                .join(', ')}
+                            </small>
+                          </>
+                        )}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <ul>
+                  <li>Focused combination teaching</li>
+                  <li>Intensive exam preparation</li>
+                  <li>Career &amp; university guidance</li>
+                </ul>
+              )}
             </article>
           </div>
         </div>

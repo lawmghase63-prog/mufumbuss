@@ -620,6 +620,87 @@
   flex-shrink: 0;
 }
 
+/* ---------- Academic subjects & combinations ---------- */
+.subject-forms {
+  display: grid;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.subject-form h4 {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--green-700);
+  margin-bottom: 6px;
+}
+
+.subject-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.subject-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #eef6f1;
+  border: 1px solid #d4e5da;
+  color: var(--green-900);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.subject-chip.empty {
+  color: var(--muted);
+  font-weight: 500;
+  background: #f6f8f7;
+}
+
+.combo-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.combo-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #fbf7e9;
+  border: 1px solid #f0e4c0;
+}
+
+.combo-code {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: var(--gold);
+  color: #241a02;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+}
+
+.combo-desc {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.5;
+}
+
+.combo-desc small {
+  display: inline;
+  color: var(--muted);
+  font-weight: 500;
+}
+
 /* ---------- Gallery ---------- */
 .gallery-grid {
   display: grid;
