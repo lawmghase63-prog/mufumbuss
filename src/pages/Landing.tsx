@@ -79,11 +79,12 @@ const CONTENT = {
     'Fee receipt / bank pay-in slip',
   ],
   contacts: {
-    address: 'P.O. Box 155, Iramba, Singida',
+    address: 'P.O. Box 155, Kisaki, Singida Municipal, Singida',
     phone: '+255 622 562 676',
     email: 'info@mufumbuss.ac.tz',
     hours: 'Mon – Fri: 7:30 AM – 4:00 PM',
   },
+  mapQuery: 'Kisaki, Singida, Tanzania',
 }
 /* ========================================================== */
 
@@ -540,6 +541,15 @@ export default function Landing() {
               <h3>Office Hours</h3>
               <p>{CONTENT.contacts.hours}</p>
             </div>
+          </div>
+          <div className="contact-map reveal">
+            <iframe
+              title="Mufumbu Secondary School location map"
+              src={`https://www.google.com/maps?q=${encodeURIComponent(CONTENT.mapQuery)}&z=14&output=embed`}
+              loading="lazy"
+              allowFullScreen
+              referrerPolicy="no-referrer-when-downgrade"
+            />
           </div>
         </div>
       </section>
