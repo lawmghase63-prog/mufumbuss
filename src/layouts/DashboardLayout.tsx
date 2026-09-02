@@ -46,6 +46,20 @@ const NAV_SECTIONS: Record<Role, NavSection[]> = {
         { to: '/headmaster/students', label: 'Students', icon: Users },
       ],
     },
+    {
+      title: 'Staff Management',
+      items: [
+        { to: '/headmaster/teachers', label: 'Teachers', icon: UserCog },
+      ],
+    },
+    {
+      title: 'Exam Management',
+      items: [
+        { to: '/headmaster/view-results', label: 'View Results', icon: Eye },
+        { to: '/headmaster/reports', label: 'Reports', icon: FileText },
+        { to: '/headmaster/comparison', label: 'Comparison', icon: TrendingUp },
+      ],
+    },
   ],
   academic: [
     {

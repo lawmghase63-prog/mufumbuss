@@ -94,6 +94,46 @@ function App() {
             }
           />
           <Route
+            path="/headmaster/teachers"
+            element={
+              <ProtectedRoute roles={['headmaster']}>
+                <DashboardLayout>
+                  <Teachers />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/headmaster/view-results"
+            element={
+              <ProtectedRoute roles={ALL_ROLES}>
+                <DashboardLayout>
+                  <Suspense fallback={viewResultsFallback}><ViewResults /></Suspense>
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/headmaster/reports"
+            element={
+              <ProtectedRoute roles={['headmaster']}>
+                <DashboardLayout>
+                  <Suspense fallback={reportsFallback}><Reports /></Suspense>
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/headmaster/comparison"
+            element={
+              <ProtectedRoute roles={['headmaster']}>
+                <DashboardLayout>
+                  <Suspense fallback={comparisonFallback}><Comparison /></Suspense>
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/headmaster/:page"
             element={
               <ProtectedRoute roles={['headmaster']}>
