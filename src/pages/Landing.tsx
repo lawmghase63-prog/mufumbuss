@@ -84,7 +84,8 @@ const CONTENT = {
     email: 'info@mufumbuss.ac.tz',
     hours: 'Mon – Fri: 7:30 AM – 4:00 PM',
   },
-  mapQuery: 'Kisaki, Singida, Tanzania',
+  mapQuery: 'Kisaki, Singida Municipal, Tanzania',
+  mapCoords: '-4.8977778,34.7633333',
 }
 /* ========================================================== */
 
@@ -545,7 +546,7 @@ export default function Landing() {
           <div className="contact-map reveal">
             <iframe
               title="Mufumbu Secondary School location map"
-              src={`https://www.google.com/maps?q=${encodeURIComponent(CONTENT.mapQuery)}&z=14&output=embed`}
+              src={`https://maps.google.com/maps?q=${encodeURIComponent(CONTENT.mapCoords)}&z=14&t=m&iwloc=near&output=embed`}
               loading="lazy"
               allowFullScreen
               referrerPolicy="no-referrer-when-downgrade"
