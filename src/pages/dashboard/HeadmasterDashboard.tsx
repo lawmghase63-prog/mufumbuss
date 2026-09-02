@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Users, UserCog, Eye, FileText, TrendingUp } from 'lucide-react'
+import { Users, UserCog, Eye, FileText, TrendingUp, FileUp } from 'lucide-react'
 import { useAuth } from '../../lib/auth'
 import { supabase } from '../../lib/supabase'
 import StatCard from '../../components/StatCard'
@@ -75,6 +75,10 @@ export default function HeadmasterDashboard() {
             <Link to="/headmaster/comparison" className="action-btn">
               <TrendingUp size={17} />
               Comparison
+            </Link>
+            <Link to="/headmaster/joining-instructions" className="action-btn">
+              <FileUp size={17} />
+              Joining Instr.
             </Link>
           </div>
         </div>

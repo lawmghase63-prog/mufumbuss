@@ -134,6 +134,16 @@ function App() {
             }
           />
           <Route
+            path="/headmaster/joining-instructions"
+            element={
+              <ProtectedRoute roles={['headmaster']}>
+                <DashboardLayout>
+                  <Suspense fallback={smsFallback}><JoiningInstructions /></Suspense>
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/headmaster/:page"
             element={
               <ProtectedRoute roles={['headmaster']}>

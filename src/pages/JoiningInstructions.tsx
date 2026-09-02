@@ -6,6 +6,8 @@ import {
   Trash2,
   Download,
   RefreshCw,
+  Pencil,
+  X,
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
@@ -17,6 +19,7 @@ export interface JoiningDoc {
   id: string
   level: 'O' | 'A'
   title: string
+  description: string | null
   file_path: string
   file_url: string
   file_name: string | null
@@ -25,7 +28,7 @@ export interface JoiningDoc {
   created_at: string
 }
 
-const ACCEPTED = '.pdf,.doc,.docx,.png,.jpg,.jpeg'
+const ACCEPTED = '.pdf'
 
 function fmtSize(bytes: number | null): string {
   if (!bytes) return ''
@@ -51,10 +54,17 @@ export default function JoiningInstructions() {
   const [loading, setLoading] = useState(true)
   const [level, setLevel] = useState<'O' | 'A'>('O')
   const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
   const [file, setFile] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)
   const [flash, setFlash] = useState<{ type: 'ok' | 'error'; text: string } | null>(null)
   const [confirmDoc, setConfirmDoc] = useState<JoiningDoc | null>(null)
+  const [editing, setEditing] = useState<JoiningDoc | null>(null)
+  const [editLevel, setEditLevel] = useState<'O' | 'A'>('O')
+  const [editTitle, setEditTitle] = useState('')
+  const [editDescription, setEditDescription] = useState('')
+  const [editFile, setEditFile] = useState<File | null>(null)
+  const [savingEdit, setSavingEdit] = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -105,6 +115,7 @@ export default function JoiningInstructions() {
     const insRes = await supabase.from('joining_instructions').insert({
       level,
       title: finalTitle,
+      description: description.trim() || null,
       file_path: path,
       file_url: pub.publicUrl,
       file_name: file.name,
@@ -121,6 +132,7 @@ export default function JoiningInstructions() {
 
     setUploading(false)
     setTitle('')
+    setDescription('')
     setFile(null)
     const input = document.querySelector<HTMLInputElement>('#ji-file')
     if (input) input.value = ''
@@ -134,6 +146,82 @@ export default function JoiningInstructions() {
     await supabase.storage.from('documents').remove([doc.file_path])
     await load()
     setFlash({ type: 'ok', text: `"${doc.title}" removed.` })
+  }
+
+  function openEdit(doc: JoiningDoc) {
+    setEditing(doc)
+    setEditLevel(doc.level)
+    setEditTitle(doc.title)
+    setEditDescription(doc.description ?? '')
+    setEditFile(null)
+  }
+
+  async function handleSaveEdit(e: FormEvent) {
+    e.preventDefault()
+    if (!editing) return
+    const finalTitle =
+      editTitle.trim() || `Joining Instructions – ${levelLabel(editLevel)}`
+    setSavingEdit(true)
+    setFlash(null)
+
+    const base: {
+      level: 'O' | 'A'
+      title: string
+      description: string | null
+      file_path?: string
+      file_url?: string
+      file_name?: string | null
+      mime_type?: string | null
+      size_bytes?: number | null
+    } = {
+      level: editLevel,
+      title: finalTitle,
+      description: editDescription.trim() || null,
+    }
+
+    if (editFile) {
+      if (editFile.size > 15 * 1024 * 1024) {
+        setSavingEdit(false)
+        setFlash({ type: 'error', text: 'File is too large. Maximum is 15 MB.' })
+        return
+      }
+      const safeName = editFile.name.replace(/[^\w.\- ]+/g, '_').replace(/\s+/g, '-')
+      const path = `joining/${editLevel}/${Date.now()}-${safeName}`
+      const upRes = await supabase.storage.from('documents').upload(path, editFile, {
+        cacheControl: '3600',
+        upsert: false,
+        contentType: editFile.type || undefined,
+      })
+      if (upRes.error) {
+        setSavingEdit(false)
+        const msg = (upRes.error as { message?: string }).message ?? 'unknown error'
+        setFlash({ type: 'error', text: `Upload failed: ${msg}` })
+        return
+      }
+      const { data: pub } = supabase.storage.from('documents').getPublicUrl(path)
+      base.file_path = path
+      base.file_url = pub.publicUrl
+      base.file_name = editFile.name
+      base.mime_type = editFile.type || null
+      base.size_bytes = editFile.size
+    }
+
+    const updRes = await supabase.from('joining_instructions').update(base).eq('id', editing.id)
+    if (updRes.error) {
+      if (base.file_path) await supabase.storage.from('documents').remove([base.file_path])
+      setSavingEdit(false)
+      setFlash({ type: 'error', text: `Could not save changes: ${updRes.error.message}` })
+      return
+    }
+    if (base.file_path && editing.file_path) {
+      await supabase.storage.from('documents').remove([editing.file_path]).catch(() => {})
+    }
+
+    setSavingEdit(false)
+    setEditing(null)
+    setEditFile(null)
+    await load()
+    setFlash({ type: 'ok', text: `"${finalTitle}" updated.` })
   }
 
   const oDocs = docs.filter((d) => d.level === 'O')
@@ -177,7 +265,18 @@ export default function JoiningInstructions() {
           </label>
 
           <label className="ji-field ji-grow">
-            <span className="field-label">Document (PDF / DOC / Image, max 15 MB)</span>
+            <span className="field-label">Brief description (optional)</span>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Short notes for parents and students, e.g. reporting date, required items..."
+              maxLength={500}
+              rows={2}
+            />
+          </label>
+
+          <label className="ji-field ji-grow">
+            <span className="field-label">Document (PDF only, max 15 MB)</span>
             <input
               id="ji-file"
               type="file"
@@ -227,6 +326,7 @@ export default function JoiningInstructions() {
                     </span>
                     <div className="ji-doc-meta">
                       <strong>{d.title}</strong>
+                      {d.description && <p className="ji-doc-desc">{d.description}</p>}
                       <small>
                         {d.file_name} {fmtSize(d.size_bytes) && `· ${fmtSize(d.size_bytes)}`} ·{' '}
                         {fmtDate(d.created_at)}
@@ -242,6 +342,14 @@ export default function JoiningInstructions() {
                       >
                         <Download size={16} />
                       </a>
+                      <button
+                        type="button"
+                        className="row-act"
+                        title="Edit"
+                        onClick={() => openEdit(d)}
+                      >
+                        <Pencil size={16} />
+                      </button>
                       <button
                         type="button"
                         className="row-act row-del"
@@ -272,6 +380,7 @@ export default function JoiningInstructions() {
                     </span>
                     <div className="ji-doc-meta">
                       <strong>{d.title}</strong>
+                      {d.description && <p className="ji-doc-desc">{d.description}</p>}
                       <small>
                         {d.file_name} {fmtSize(d.size_bytes) && `· ${fmtSize(d.size_bytes)}`} ·{' '}
                         {fmtDate(d.created_at)}
@@ -287,6 +396,14 @@ export default function JoiningInstructions() {
                       >
                         <Download size={16} />
                       </a>
+                      <button
+                        type="button"
+                        className="row-act"
+                        title="Edit"
+                        onClick={() => openEdit(d)}
+                      >
+                        <Pencil size={16} />
+                      </button>
                       <button
                         type="button"
                         className="row-act row-del"
@@ -313,6 +430,100 @@ export default function JoiningInstructions() {
           onConfirm={() => handleDelete(confirmDoc)}
           onCancel={() => setConfirmDoc(null)}
         />
+      )}
+
+      {editing && (
+        <div className="modal-overlay" role="dialog" aria-modal="true">
+          <form
+            className="modal ji-edit-modal"
+            onSubmit={handleSaveEdit}
+          >
+            <div className="modal-head">
+              <div>
+                <h3>Edit Joining Instruction</h3>
+                <p className="modal-sub">
+                  {editing.file_name || editing.title} — leave the file empty to keep
+                  the current PDF.
+                </p>
+              </div>
+              <button
+                type="button"
+                className="modal-close"
+                onClick={() => setEditing(null)}
+                aria-label="Close"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="ji-edit-form">
+              <label className="field">
+                <span className="field-label">Level</span>
+                <select
+                  value={editLevel}
+                  onChange={(e) => setEditLevel(e.target.value as 'O' | 'A')}
+                >
+                  <option value="O">O-Level (Form 1 – 4)</option>
+                  <option value="A">A-Level (Form 5 – 6)</option>
+                </select>
+              </label>
+
+              <label className="field">
+                <span className="field-label">Title</span>
+                <input
+                  type="text"
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  maxLength={120}
+                />
+              </label>
+
+              <label className="field">
+                <span className="field-label">Brief description</span>
+                <textarea
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  placeholder="Short notes for parents and students..."
+                  maxLength={500}
+                  rows={3}
+                />
+              </label>
+
+              {editing.file_name && (
+                <span className="ji-current-file">
+                  Current file: {editing.file_name}
+                </span>
+              )}
+
+              <label className="field">
+                <span className="field-label">Replace PDF (optional)</span>
+                <input
+                  type="file"
+                  accept={ACCEPTED}
+                  onChange={(e) => setEditFile(e.target.files?.[0] ?? null)}
+                />
+              </label>
+
+              <button
+                type="submit"
+                className="btn btn-primary modal-save"
+                disabled={savingEdit}
+              >
+                {savingEdit ? (
+                  <>
+                    <Loader2 size={17} className="spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <FileText size={17} />
+                    Save Changes
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
       )}
     </div>
   )

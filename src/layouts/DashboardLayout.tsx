@@ -60,6 +60,12 @@ const NAV_SECTIONS: Record<Role, NavSection[]> = {
         { to: '/headmaster/comparison', label: 'Comparison', icon: TrendingUp },
       ],
     },
+    {
+      title: 'Communication',
+      items: [
+        { to: '/headmaster/joining-instructions', label: 'Joining Instr.', icon: FileUp },
+      ],
+    },
   ],
   academic: [
     {

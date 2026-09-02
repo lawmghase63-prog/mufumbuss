@@ -40,6 +40,7 @@ const STATEMENTS = [
     id uuid primary key default gen_random_uuid(),
     level text not null check (level in ('O','A')),
     title text not null,
+    description text,
     file_path text not null,
     file_url text not null,
     file_name text,
@@ -48,6 +49,7 @@ const STATEMENTS = [
     uploaded_by uuid references public.profiles(id) on delete set null,
     created_at timestamptz not null default now()
   )`,
+  `alter table public.joining_instructions add column if not exists description text`,
   `alter table public.joining_instructions enable row level security`,
   `drop policy if exists "public read joining instructions" on public.joining_instructions;
    create policy "public read joining instructions" on public.joining_instructions for select using (true)`,

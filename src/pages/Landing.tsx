@@ -6,6 +6,7 @@ import {
   Phone,
   Mail,
   MapPin,
+  MessageCircle,
   Clock,
   GraduationCap,
   BookOpen,
@@ -79,12 +80,14 @@ const CONTENT = {
   ],
   contacts: {
     address: 'P.O. Box 155, Iramba, Singida',
-    phone: '+255 700 000 000',
+    phone: '+255 622 562 676',
     email: 'info@mufumbuss.ac.tz',
     hours: 'Mon – Fri: 7:30 AM – 4:00 PM',
   },
 }
 /* ========================================================== */
+
+const ACADEMIC_PHONE_INTL = '255622562676'
 
 type PhotoModule = { default: string }
 
@@ -444,7 +447,6 @@ export default function Landing() {
             <h2>
               Joining <em>instructions</em>
             </h2>
-            <p>Four simple steps to join Mufumbu Secondary School.</p>
           </div>
 
           <div className="docs-block reveal">
@@ -464,6 +466,7 @@ export default function Landing() {
                     </span>
                     <span className="doc-meta">
                       <strong>{d.title}</strong>
+                      {d.description && <span className="doc-desc">{d.description}</span>}
                       <small>
                         {d.level === 'O' ? 'O-Level (Form 1–4)' : 'A-Level (Form 5–6)'}
                         {d.size_bytes
@@ -480,35 +483,9 @@ export default function Landing() {
               </div>
             ) : (
               <p className="docs-empty">
-                Official joining instruction documents will be published here soon. In the
-                meantime, follow the steps below.
+                Official joining instruction documents will be published here soon.
               </p>
             )}
-          </div>
-
-          <ol className="steps-grid">
-            {CONTENT.joiningSteps.map((s, i) => (
-              <li className="step-card reveal" key={s.title}>
-                <span className="step-num">{String(i + 1).padStart(2, '0')}</span>
-                <h3>{s.title}</h3>
-                <p>{s.text}</p>
-              </li>
-            ))}
-          </ol>
-
-          <div className="req-card reveal">
-            <div className="req-head">
-              <FileText size={20} />
-              <h3>What to bring when reporting</h3>
-            </div>
-            <ul className="req-list">
-              {CONTENT.requirements.map((r) => (
-                <li key={r}>
-                  <CheckCircle2 size={16} />
-                  {r}
-                </li>
-              ))}
-            </ul>
           </div>
         </div>
       </section>
@@ -532,11 +509,24 @@ export default function Landing() {
             <div className="contact-card reveal">
               <Phone size={22} />
               <h3>Call Us</h3>
-              <p>
-                <a href={`tel:${CONTENT.contacts.phone.replace(/\s/g, '')}`}>
-                  {CONTENT.contacts.phone}
-                </a>
+              <p className="contact-hint">
+                Reach the Academic Office directly by call or WhatsApp.
               </p>
+              <div className="contact-actions">
+                <a className="contact-act" href={`tel:+${ACADEMIC_PHONE_INTL}`}>
+                  <Phone size={15} />
+                  Call
+                </a>
+                <a
+                  className="contact-act wa"
+                  href={`https://wa.me/${ACADEMIC_PHONE_INTL}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <MessageCircle size={15} />
+                  WhatsApp
+                </a>
+              </div>
             </div>
             <div className="contact-card reveal">
               <Mail size={22} />
@@ -592,7 +582,16 @@ export default function Landing() {
               <MapPin size={15} /> {CONTENT.contacts.address}
             </span>
             <span>
-              <Phone size={15} /> {CONTENT.contacts.phone}
+              <Phone size={15} />
+              <a href={`tel:+${ACADEMIC_PHONE_INTL}`}>Call us</a>
+              <span className="footer-sep">·</span>
+              <a
+                href={`https://wa.me/${ACADEMIC_PHONE_INTL}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                WhatsApp
+              </a>
             </span>
             <span>
               <Mail size={15} /> {CONTENT.contacts.email}
