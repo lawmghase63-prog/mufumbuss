@@ -113,8 +113,9 @@
   flex-direction: column;
   box-sizing: border-box;
   padding: 20px 14px 16px;
-  color: #d1fae5;
+color: #d1fae5;
   overflow-y: auto;
+  font-family: 'Plus Jakarta Sans', system-ui, 'Segoe UI', Roboto, sans-serif;
   background:
     radial-gradient(520px 300px at 110% -10%, rgba(110, 231, 183, 0.2), transparent 60%),
     radial-gradient(420px 260px at -10% 115%, rgba(52, 211, 153, 0.16), transparent 60%),
@@ -196,9 +197,10 @@
   border: none;
   background: none;
   color: #6ee7b7;
-  font-size: 0.64rem;
+  font-family: inherit;
+  font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: 1.3px;
+  letter-spacing: 1.1px;
   text-transform: uppercase;
   cursor: pointer;
   text-align: left;
@@ -220,12 +222,13 @@
   display: flex;
   align-items: center;
   gap: 11px;
-  padding: 9px 12px;
+  padding: 10px 12px;
   border-radius: 11px;
   color: #a7f3d0;
   text-decoration: none;
-  font-size: 0.87rem;
-  font-weight: 500;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.2px;
   transition: background 0.15s, color 0.15s;
 }
 
