@@ -1635,6 +1635,14 @@ color: #d1fae5;
   text-align: center;
 }
 
+.mark-table .num-col {
+  width: 40px;
+  text-align: center;
+  color: var(--text-m);
+  font-weight: 600;
+  font-size: 0.82rem;
+}
+
 .mark-input {
   font: inherit;
   font-size: 0.86rem;

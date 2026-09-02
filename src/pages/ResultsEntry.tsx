@@ -487,6 +487,7 @@ export default function ResultsEntry() {
                               <table className="data-table mark-table">
                                 <thead>
                                   <tr>
+                                    <th className="num-col">#</th>
                                     <th>Student</th>
                                     <th className="mark-col">Theory</th>
                                     {showsPractical(selectedSubject) && (
@@ -496,7 +497,7 @@ export default function ResultsEntry() {
                                   </tr>
                                 </thead>
                                 <tbody>
-                                  {activeStudents.map((s) => {
+                                  {activeStudents.map((s, i) => {
                                     const entry = entries.get(
                                       keyOf(s.id, selectedSubject.id),
                                     )
@@ -506,6 +507,7 @@ export default function ResultsEntry() {
                                         key={s.id}
                                         className={absent ? 'row-absent' : ''}
                                       >
+                                        <td className="num-col">{i + 1}</td>
                                         <td>
                                           <div className="student-cell">
                                             <span className="student-avatar">

@@ -22,7 +22,6 @@ import {
   Camera,
   Landmark,
   Download,
-  Construction,
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import type { JoiningDoc } from './JoiningInstructions'
@@ -108,7 +107,6 @@ export default function Landing() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [docs, setDocs] = useState<JoiningDoc[]>([])
-  const [showBanner, setShowBanner] = useState(true)
   const [subjects, setSubjects] = useState<Subject[]>([])
   const [combinations, setCombinations] = useState<Combination[]>([])
 
@@ -219,20 +217,6 @@ export default function Landing() {
       {/* ---------- Hero ---------- */}
       <section id="home" className="land-hero">
         <div className="hero-overlay" aria-hidden="true" />
-        {showBanner && (
-          <div className="construction-banner" role="status">
-            <Construction size={15} />
-            <span>Site Under Construction</span>
-            <button
-              type="button"
-              className="banner-close"
-              onClick={() => setShowBanner(false)}
-              aria-label="Dismiss notice"
-            >
-              <X size={13} />
-            </button>
-          </div>
-        )}
         <div className="hero-content reveal in">
           <span className="hero-motto-chip">
             <Sparkles size={14} />

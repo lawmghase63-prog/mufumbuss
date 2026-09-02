@@ -174,58 +174,6 @@
   background: linear-gradient(180deg, rgba(6, 35, 26, 0) 55%, rgba(6, 35, 26, 0.45));
 }
 
-/* ---------- Construction hanging banner ---------- */
-.construction-banner {
-  position: absolute;
-  top: 78px;
-  left: 50%;
-  z-index: 6;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  padding: 11px 30px 16px;
-  background: repeating-linear-gradient(
-    45deg,
-    var(--gold) 0 16px,
-    #e5a70c 16px 32px
-  );
-  color: #241a02;
-  font-size: 12.5px;
-  font-weight: 800;
-  letter-spacing: 1.4px;
-  text-transform: uppercase;
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 11px), 50% 100%, 0 calc(100% - 11px));
-  filter: drop-shadow(0 14px 18px rgba(0, 0, 0, 0.3));
-  transform-origin: top center;
-  animation: banner-swing 3.6s ease-in-out infinite;
-}
-
-.banner-close {
-  display: grid;
-  place-items: center;
-  margin-left: 2px;
-  padding: 3px;
-  border: none;
-  border-radius: 50%;
-  background: rgba(36, 26, 2, 0.14);
-  color: inherit;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.banner-close:hover {
-  background: rgba(36, 26, 2, 0.28);
-}
-
-@keyframes banner-swing {
-  0%, 100% { transform: translateX(-50%) rotate(-1.4deg); }
-  50% { transform: translateX(-50%) rotate(1.4deg); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .construction-banner { animation: none; }
-}
-
 .hero-content {
   position: relative;
   max-width: 860px;
