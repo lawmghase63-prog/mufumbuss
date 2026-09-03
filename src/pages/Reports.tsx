@@ -61,6 +61,7 @@ interface ReportCard {
   history: HistRow[]
   comment: string
   parentMsg: string
+  incomplete: boolean
 }
 
 const REMARKS: Record<string, string> = {
@@ -209,7 +210,7 @@ function drawInfoBlock(
     y + 4.2,
   )
   doc.text(
-    `Tarehe: ${dateStr}   |   Wastani: ${card.avg.toFixed(2)}%`,
+    `Tarehe: ${dateStr}   |   Wastani: ${card.incomplete ? '-' : `${card.avg.toFixed(2)}%`}`,
     MARGIN + 188,
     y + 4.2,
     { align: 'right' },
@@ -228,7 +229,7 @@ function drawSummaryLine(
   doc.setFont('times', 'bold')
   doc.setFontSize(9.5)
   doc.text(
-    `GPA: ${card.gpa.toFixed(2)}   |   Nafasi: ${card.position} / ${cohort}   |   Jumla Pointi: ${card.totalPoints}   |   Division: ${card.division}`,
+    `GPA: ${card.incomplete ? '-' : card.gpa.toFixed(2)}   |   Nafasi: ${card.position} / ${cohort}   |   Jumla Pointi: ${card.incomplete ? '-' : card.totalPoints}   |   Division: ${card.division}`,
     MARGIN + CONTENT_W - 2,
     y + 4.2,
     { align: 'right' },
@@ -479,10 +480,15 @@ async function buildPdf(
     }))
     const comp = computeDivision(form, entries, subjectTypes)
     const isAbsent = myMarks.length === 0 && comp === null
-    const totalPoints = comp?.points ?? (isAbsent ? 0 : r.total_points)
+    // O-Level (F1-F4): a student must have attempted at least 7 subjects to earn
+    // a division. Fewer than 7 valid marks => INCOMPLETE (display only).
+    const incomplete = level === 'o' && !isAbsent && (comp?.subjectsUsed ?? 0) < 7
+    const totalPoints = isAbsent ? 0 : incomplete ? 0 : comp?.points ?? r.total_points
     const division = isAbsent
       ? 'ABSENT'
-      : comp?.division ?? r.division
+      : incomplete
+        ? 'INC'
+        : comp?.division ?? r.division
 
     const myHistRaw = histResults.filter((h) => h.student_id === r.student_id)
     const history: HistRow[] = []
@@ -535,10 +541,15 @@ async function buildPdf(
       history,
       comment: isAbsent
         ? 'Mwanafunzi hakufanya mtihani huu. Mzazi ashirikiane na shule kujua sababu ya kutofanya mtihani.'
-        : schoolComment(avg),
+        : incomplete
+          ? 'Mwanafunzi hakukamilisha masomo yake (Incomplete). Mzazi ashirikiane na shule kujua sababu.'
+          : schoolComment(avg),
       parentMsg: isAbsent
         ? `Mzazi mpendwa wa ${student.full_name}, mwanafunzi hakufanya mtihani wa '${exam.name}' (ABSENT). Tafadhali wasiliana na shule kwa maelezo zaidi.`
-        : `Mzazi mpendwa wa ${student.full_name}, matokeo ya '${exam.name}' yamehitimishwa. Amepata wastani wa ${avg.toFixed(2)}% nafasi ya ${positionByStudent.get(r.student_id) ?? 0} kati ya wanafunzi ${cohort}. ${parentAdvice(avg)}`,
+        : incomplete
+          ? `Mzazi mpendwa wa ${student.full_name}, matokeo ya '${exam.name}' yamehitimishwa. Amepata INCOMPLETE kwa sababu hakukamilisha masomo yake kwenye mtihani huu.`
+          : `Mzazi mpendwa wa ${student.full_name}, matokeo ya '${exam.name}' yamehitimishwa. Amepata wastani wa ${avg.toFixed(2)}% nafasi ya ${positionByStudent.get(r.student_id) ?? 0} kati ya wanafunzi ${cohort}. ${parentAdvice(avg)}`,
+      incomplete,
     })
   }
 
@@ -705,7 +716,7 @@ async function buildPdf(
       doc,
       y,
       'Ujumbe kwa Mzazi / Mlezi',
-      `Pointi: ${card.totalPoints} | GPA: ${card.gpa.toFixed(2)} | Nafasi: ${card.position} / ${cohort} | Wastani: ${card.avg.toFixed(1)}%\n${card.parentMsg}`,
+      `Pointi: ${card.incomplete ? '-' : card.totalPoints} | GPA: ${card.incomplete ? '-' : card.gpa.toFixed(2)} | Nafasi: ${card.position} / ${cohort} | Wastani: ${card.incomplete ? '-' : `${card.avg.toFixed(1)}%`}\n${card.parentMsg}`,
       true,
     )
     drawSignatures(doc, y)

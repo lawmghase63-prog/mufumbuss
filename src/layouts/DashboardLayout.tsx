@@ -118,14 +118,6 @@ const NAV_SECTIONS: Record<Role, NavSection[]> = {
         { to: '/teacher/entry', label: 'Enter Results', icon: PenLine },
       ],
     },
-    {
-      title: 'Exam Management',
-      items: [
-        { to: '/teacher/view-results', label: 'View Results', icon: Eye },
-        { to: '/teacher/reports', label: 'Reports', icon: FileText },
-        { to: '/teacher/comparison', label: 'Comparison', icon: TrendingUp },
-      ],
-    },
   ],
 }
 

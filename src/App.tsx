@@ -106,7 +106,7 @@ function App() {
           <Route
             path="/headmaster/view-results"
             element={
-              <ProtectedRoute roles={ALL_ROLES}>
+              <ProtectedRoute roles={['headmaster']}>
                 <DashboardLayout>
                   <Suspense fallback={viewResultsFallback}><ViewResults /></Suspense>
                 </DashboardLayout>
@@ -257,7 +257,7 @@ function App() {
           <Route
             path="/academic/view-results"
             element={
-              <ProtectedRoute roles={ALL_ROLES}>
+              <ProtectedRoute roles={['academic']}>
                 <DashboardLayout>
                   <Suspense fallback={viewResultsFallback}><ViewResults /></Suspense>
                 </DashboardLayout>
@@ -321,36 +321,6 @@ function App() {
               <ProtectedRoute roles={['teacher']}>
                 <DashboardLayout>
                   <MarkEntry />
-                </DashboardLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/teacher/view-results"
-            element={
-              <ProtectedRoute roles={ALL_ROLES}>
-                <DashboardLayout>
-                  <Suspense fallback={viewResultsFallback}><ViewResults /></Suspense>
-                </DashboardLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/teacher/reports"
-            element={
-              <ProtectedRoute roles={['teacher']}>
-                <DashboardLayout>
-                  <Suspense fallback={reportsFallback}><Reports /></Suspense>
-                </DashboardLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/teacher/comparison"
-            element={
-              <ProtectedRoute roles={['teacher']}>
-                <DashboardLayout>
-                  <Suspense fallback={comparisonFallback}><Comparison /></Suspense>
                 </DashboardLayout>
               </ProtectedRoute>
             }

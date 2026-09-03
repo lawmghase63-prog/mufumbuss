@@ -233,6 +233,42 @@ export default function ViewResults() {
         continue
       }
 
+      // O-Level (F1-F4): a student must have attempted at least 7 subjects to
+      // earn a division. Fewer than 7 valid marks => INCOMPLETE (display only):
+      // division becomes "INC", average and points become "-".
+      const incomplete = level === 'o' && (r.subjects_used ?? 0) < 7
+      if (incomplete) {
+        const subjectParts = studentMarks
+          .map((m) => {
+            const code = subjectById.get(m.subject_id)?.code ?? '?'
+            const total = subjectTotalMark(m)
+            if (total == null) return `${code}-ABS`
+            const subLevel = gradeScaleOf(subjectById.get(m.subject_id)?.type ?? 'o')
+            const g = gradeForMark(total, subLevel) ?? 'F'
+            return `${code}-${g}`
+          })
+          .sort()
+        const subjectPartsMarks = studentMarks
+          .map((m) => {
+            const code = subjectById.get(m.subject_id)?.code ?? '?'
+            const total = subjectTotalMark(m)
+            if (total == null) return `${code}-ABS`
+            return `${code}-${total}`
+          })
+          .sort()
+        list.push({
+          name: student.full_name,
+          sex: student.gender,
+          avg: 0,
+          grade: '-',
+          pts: 0,
+          division: 'INC',
+          subjects: subjectParts.join(' '),
+          subjectsMarks: subjectPartsMarks.join(' '),
+        })
+        continue
+      }
+
       const totals = studentMarks
         .map(subjectTotalMark)
         .filter((t): t is number => t != null)
@@ -389,6 +425,9 @@ export default function ViewResults() {
     }
     for (const r of scopedResults) {
       if ((r.subjects_used ?? 0) === 0) continue
+      // O-Level students with fewer than 7 valid marks show as INCOMPLETE (INC)
+      // and are excluded from the division distribution.
+      if (r.level === 'o' && (r.subjects_used ?? 0) < 7) continue
       const student = studentById.get(r.student_id)
       if (!student) continue
       const d = divByGender[r.division]
@@ -634,9 +673,9 @@ export default function ViewResults() {
                       <td>{row.position}</td>
                       <td className="left">{row.name}</td>
                       <td>{row.sex}</td>
-                      <td>{row.avg.toFixed(2)}</td>
-                      <td>{row.grade}</td>
-                      <td>{row.pts}</td>
+                      <td>{row.division === 'INC' ? '-' : row.avg.toFixed(2)}</td>
+                      <td>{row.division === 'INC' ? '-' : row.grade}</td>
+                      <td>{row.division === 'INC' ? '-' : row.pts}</td>
                       <td>{row.division}</td>
                       <td className="left">
                         {viewMode === 'marks' ? row.subjectsMarks : row.subjects}
