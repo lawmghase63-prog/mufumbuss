@@ -21,7 +21,7 @@ interface Entry {
   absent: boolean
 }
 
-const keyOf = (studentId: string, subjectId: string) => `${studentId}::${subjectId}`
+const keyOf = (studentId: string, subjectId: string, form: string) => `${studentId}::${subjectId}::${form}`
 
 export default function ResultsEntry() {
   const [loading, setLoading] = useState(true)
@@ -48,7 +48,11 @@ export default function ResultsEntry() {
           .select('id, admission_no, full_name, form, status')
           .eq('status', 'active'),
         paginate(async ({ from, to }) =>
-          supabase.from('student_subjects').select('student_id, subject_id').range(from, to),
+          supabase
+            .from('student_subjects')
+            .select('student_id, subject_id')
+            .order('id', { ascending: true })
+            .range(from, to),
         ),
         supabase.from('combinations').select('*'),
         supabase.from('student_combinations').select('student_id, combination_id'),
@@ -177,11 +181,14 @@ export default function ResultsEntry() {
         .from('exam_marks')
         .select('*')
         .eq('exam_id', selectedExamId)
+        .order('id', { ascending: true })
         .range(from, to),
     ).then((res) => {
         const next = new Map<string, Entry>()
+        const studentFormSet = new Set(students.filter((s) => s.form === selectedForm).map((s) => s.id))
         ;(res.data as ExamMark[] | null)?.forEach((m) => {
-          next.set(keyOf(m.student_id, m.subject_id), {
+          if (!studentFormSet.has(m.student_id)) return
+          next.set(keyOf(m.student_id, m.subject_id, selectedForm!), {
             theory: String(m.theory),
             practical: m.practical != null ? String(m.practical) : '',
             absent: m.absent,
@@ -189,7 +196,7 @@ export default function ResultsEntry() {
         })
         setEntries(next)
       })
-  }, [selectedExamId])
+  }, [selectedExamId, selectedForm, students])
 
   const selectedSubject = subjectsInForm.find((s) => s.id === selectedSubjectId) ?? null
   const activeStudents = selectedSubject
@@ -200,7 +207,7 @@ export default function ResultsEntry() {
     const list = subjectStudents.get(subject.id) ?? []
     let entered = 0
     list.forEach((s) => {
-      const entry = entries.get(keyOf(s.id, subject.id))
+      const entry = entries.get(keyOf(s.id, subject.id, selectedForm!))
       if (entry && (entry.absent || entry.theory.trim() !== '')) entered++
     })
     return { entered, total: list.length }
@@ -227,7 +234,7 @@ export default function ResultsEntry() {
   ) {
     setEntries((prev) => {
       const next = new Map(prev)
-      const key = keyOf(studentId, subjectId)
+      const key = keyOf(studentId, subjectId, selectedForm!)
       const cur = next.get(key) ?? { theory: '', practical: '', absent: false }
       next.set(key, { ...cur, [field]: value })
       return next
@@ -237,7 +244,7 @@ export default function ResultsEntry() {
   function toggleAbsent(subjectId: string, studentId: string) {
     setEntries((prev) => {
       const next = new Map(prev)
-      const key = keyOf(studentId, subjectId)
+      const key = keyOf(studentId, subjectId, selectedForm!)
       const cur = next.get(key) ?? { theory: '', practical: '', absent: false }
       const absent = !cur.absent
       next.set(key, {
@@ -254,7 +261,7 @@ export default function ResultsEntry() {
     const errors: string[] = []
     const practical = showsPractical(selectedSubject)
     activeStudents.forEach((s) => {
-      const entry = entries.get(keyOf(s.id, selectedSubject.id))
+      const entry = entries.get(keyOf(s.id, selectedSubject.id, selectedForm!))
       if (!entry || entry.absent) return
       if (entry.theory.trim() !== '') {
         const n = Number(entry.theory)
@@ -297,7 +304,7 @@ export default function ResultsEntry() {
     const practical = showsPractical(selectedSubject)
     const subjectId = selectedSubject.id
     activeStudents.forEach((s) => {
-      const entry = entries.get(keyOf(s.id, subjectId))
+      const entry = entries.get(keyOf(s.id, subjectId, selectedForm!))
       if (!entry) return
       if (entry.absent) {
         rows.push({
@@ -374,11 +381,18 @@ export default function ResultsEntry() {
         text: `${parts.join(' and ')} for ${selectedSubject.code} — Form ${selectedForm.slice(1)} (${exam.name}).`,
       })
       const res = await paginate(async ({ from, to }) =>
-        supabase.from('exam_marks').select('*').eq('exam_id', exam.id).range(from, to),
+        supabase
+          .from('exam_marks')
+          .select('*')
+          .eq('exam_id', exam.id)
+          .order('id', { ascending: true })
+          .range(from, to),
       )
       const next = new Map<string, Entry>()
+      const studentFormSet = new Set(students.filter((s) => s.form === selectedForm).map((s) => s.id))
       ;(res.data as ExamMark[] | null)?.forEach((m) => {
-        next.set(keyOf(m.student_id, m.subject_id), {
+        if (!studentFormSet.has(m.student_id)) return
+        next.set(keyOf(m.student_id, m.subject_id, selectedForm!), {
           theory: String(m.theory),
           practical: m.practical != null ? String(m.practical) : '',
           absent: m.absent,
@@ -533,7 +547,7 @@ export default function ResultsEntry() {
                                 <tbody>
                                   {activeStudents.map((s, i) => {
                                     const entry = entries.get(
-                                      keyOf(s.id, selectedSubject.id),
+                                      keyOf(s.id, selectedSubject.id, selectedForm!),
                                     )
                                     const absent = entry?.absent ?? false
                                     return (

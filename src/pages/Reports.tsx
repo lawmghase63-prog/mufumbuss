@@ -310,7 +310,12 @@ async function buildPdf(
     supabase.from('students').select('*').eq('form', form).eq('status', 'active'),
     supabase.from('subjects').select('*'),
     paginate(async ({ from, to }) =>
-      supabase.from('exam_marks').select('*').eq('exam_id', exam.id).range(from, to),
+      supabase
+        .from('exam_marks')
+        .select('*')
+        .eq('exam_id', exam.id)
+        .order('id', { ascending: true })
+        .range(from, to),
     ),
     supabase.from('exam_results').select('*').eq('exam_id', exam.id).eq('form', form),
     supabase.from('combinations').select('*'),

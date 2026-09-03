@@ -138,7 +138,12 @@ export default function Analysis() {
           supabase.from('exams').select('*').eq('id', examId ?? '').maybeSingle(),
           supabase.from('students').select('*'),
           paginate(async ({ from, to }) =>
-            supabase.from('exam_marks').select('*').eq('exam_id', examId ?? '').range(from, to),
+            supabase
+              .from('exam_marks')
+              .select('*')
+              .eq('exam_id', examId ?? '')
+              .order('id', { ascending: true })
+              .range(from, to),
           ),
           supabase
             .from('exam_results')
@@ -149,7 +154,11 @@ export default function Analysis() {
           supabase.from('combinations').select('*'),
           supabase.from('student_combinations').select('student_id, combination_id'),
           paginate(async ({ from, to }) =>
-            supabase.from('student_subjects').select('student_id, subject_id').range(from, to),
+            supabase
+              .from('student_subjects')
+              .select('student_id, subject_id')
+              .order('id', { ascending: true })
+              .range(from, to),
           ),
         ])
 

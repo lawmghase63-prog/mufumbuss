@@ -29,7 +29,7 @@ interface Entry {
   absent: boolean
 }
 
-const keyOf = (studentId: string, subjectId: string) => `${studentId}::${subjectId}`
+const keyOf = (studentId: string, subjectId: string, form: string) => `${studentId}::${subjectId}::${form}`
 
 export default function MarkEntry() {
   const { user } = useAuth()
@@ -46,6 +46,7 @@ export default function MarkEntry() {
   const [studentCombinations, setStudentCombinations] = useState<{ student_id: string; combination_id: string }[]>([])
   const [students, setStudents] = useState<Student[]>([])
   const [ssSet, setSsSet] = useState<Map<string, Set<string>>>(new Map())
+  const [studentFormMap, setStudentFormMap] = useState<Map<string, string>>(new Map())
   const [entries, setEntries] = useState<Map<string, Entry>>(new Map())
 
   useEffect(() => {
@@ -67,7 +68,11 @@ export default function MarkEntry() {
           .select('id, admission_no, full_name, form, status')
           .eq('status', 'active'),
         paginate(async ({ from, to }) =>
-          supabase.from('student_subjects').select('student_id, subject_id').range(from, to),
+          supabase
+            .from('student_subjects')
+            .select('student_id, subject_id')
+            .order('id', { ascending: true })
+            .range(from, to),
         ),
         supabase.from('combinations').select('*'),
         supabase.from('student_combinations').select('student_id, combination_id'),
@@ -87,6 +92,12 @@ export default function MarkEntry() {
         },
       )
       setSsSet(map)
+
+      const formMap = new Map<string, string>()
+      ;(studentsRes.data as Student[] | null)?.forEach((s) => {
+        formMap.set(s.id, s.form)
+      })
+      setStudentFormMap(formMap)
 
       if (myTeacher) {
         const assignRes = await supabase
@@ -217,11 +228,14 @@ export default function MarkEntry() {
         .from('exam_marks')
         .select('*')
         .eq('exam_id', selectedExamId)
+        .order('id', { ascending: true })
         .range(from, to),
     ).then((res) => {
         const next = new Map<string, Entry>()
         ;(res.data as ExamMark[] | null)?.forEach((m) => {
-          next.set(keyOf(m.student_id, m.subject_id), {
+          const form = studentFormMap.get(m.student_id)
+          if (!form) return
+          next.set(keyOf(m.student_id, m.subject_id, form), {
             theory: String(m.theory),
             practical: m.practical != null ? String(m.practical) : '',
             absent: m.absent,
@@ -229,7 +243,7 @@ export default function MarkEntry() {
         })
         setEntries(next)
       })
-  }, [selectedExamId, teacher])
+  }, [selectedExamId, teacher, studentFormMap])
 
   const selectedSubject = examSubjects.find((s) => s.id === selectedSubjectId) ?? null
 
@@ -245,7 +259,7 @@ export default function MarkEntry() {
   ) {
     setEntries((prev) => {
       const next = new Map(prev)
-      const key = keyOf(studentId, block.subject.id)
+      const key = keyOf(studentId, block.subject.id, block.form)
       const cur = next.get(key) ?? { theory: '', practical: '', absent: false }
       next.set(key, { ...cur, [field]: value })
       return next
@@ -255,7 +269,7 @@ export default function MarkEntry() {
   function toggleAbsent(block: Block, studentId: string) {
     setEntries((prev) => {
       const next = new Map(prev)
-      const key = keyOf(studentId, block.subject.id)
+      const key = keyOf(studentId, block.subject.id, block.form)
       const cur = next.get(key) ?? { theory: '', practical: '', absent: false }
       const absent = !cur.absent
       next.set(key, {
@@ -271,7 +285,7 @@ export default function MarkEntry() {
     const list = blockStudents.get(`${block.subject.id}::${block.form}`) ?? []
     let entered = 0
     list.forEach((s) => {
-      const entry = entries.get(keyOf(s.id, block.subject.id))
+      const entry = entries.get(keyOf(s.id, block.subject.id, block.form))
       if (entry && (entry.absent || entry.theory.trim() !== '')) entered++
     })
     return { entered, total: list.length }
@@ -294,7 +308,7 @@ export default function MarkEntry() {
       const list = blockStudents.get(`${block.subject.id}::${block.form}`) ?? []
       const practical = showsPractical(block.subject)
       list.forEach((s) => {
-        const entry = entries.get(keyOf(s.id, block.subject.id))
+        const entry = entries.get(keyOf(s.id, block.subject.id, block.form))
         if (!entry || entry.absent) return
         if (entry.theory.trim() !== '') {
           const n = Number(entry.theory)
@@ -341,7 +355,7 @@ export default function MarkEntry() {
       const list = blockStudents.get(`${block.subject.id}::${block.form}`) ?? []
       const subjectId = block.subject.id
       list.forEach((s) => {
-        const key = keyOf(s.id, subjectId)
+        const key = keyOf(s.id, subjectId, block.form)
         const entry = entries.get(key)
         if (!entry) return
         if (entry.absent) {
@@ -422,11 +436,18 @@ export default function MarkEntry() {
         text: `${parts.join(' and ')} for ${selectedSubject.code} (${exam.name}).`,
       })
       const res = await paginate(async ({ from, to }) =>
-        supabase.from('exam_marks').select('*').eq('exam_id', exam.id).range(from, to),
+        supabase
+          .from('exam_marks')
+          .select('*')
+          .eq('exam_id', exam.id)
+          .order('id', { ascending: true })
+          .range(from, to),
       )
       const next = new Map<string, Entry>()
       ;(res.data as ExamMark[] | null)?.forEach((m) => {
-        next.set(keyOf(m.student_id, m.subject_id), {
+        const form = studentFormMap.get(m.student_id)
+        if (!form) return
+        next.set(keyOf(m.student_id, m.subject_id, form), {
           theory: String(m.theory),
           practical: m.practical != null ? String(m.practical) : '',
           absent: m.absent,
@@ -564,7 +585,7 @@ export default function MarkEntry() {
                               </thead>
                               <tbody>
                                 {list.map((s) => {
-                                  const entry = entries.get(keyOf(s.id, block.subject.id))
+                                  const entry = entries.get(keyOf(s.id, block.subject.id, block.form))
                                   const absent = entry?.absent ?? false
                                   return (
                                     <tr key={s.id} className={absent ? 'row-absent' : ''}>

@@ -52,7 +52,11 @@ export default function Assignments() {
         supabase.from('subjects').select('*').order('code', { ascending: true }),
         supabase.from('combinations').select('*').order('code', { ascending: true }),
         paginate(async ({ from, to }) =>
-          supabase.from('student_subjects').select('*').range(from, to),
+          supabase
+            .from('student_subjects')
+            .select('*')
+            .order('id', { ascending: true })
+            .range(from, to),
         ),
         supabase.from('student_combinations').select('*'),
       ])

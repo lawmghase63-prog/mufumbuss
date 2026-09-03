@@ -188,10 +188,20 @@ export default function Comparison() {
       setError(null)
       const [prevRes, currRes] = await Promise.all([
         paginate(async ({ from, to }) =>
-          supabase.from('exam_marks').select('*').eq('exam_id', prevExamId).range(from, to),
+          supabase
+            .from('exam_marks')
+            .select('*')
+            .eq('exam_id', prevExamId)
+            .order('id', { ascending: true })
+            .range(from, to),
         ),
         paginate(async ({ from, to }) =>
-          supabase.from('exam_marks').select('*').eq('exam_id', currExamId).range(from, to),
+          supabase
+            .from('exam_marks')
+            .select('*')
+            .eq('exam_id', currExamId)
+            .order('id', { ascending: true })
+            .range(from, to),
         ),
       ])
       if (!alive) return

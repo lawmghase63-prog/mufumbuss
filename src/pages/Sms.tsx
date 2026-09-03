@@ -114,7 +114,12 @@ export default function Sms() {
       const [examRes, marksRes, resultsRes] = await Promise.all([
         supabase.from('exams').select('*').eq('id', examId).maybeSingle(),
         paginate(async ({ from, to }) =>
-          supabase.from('exam_marks').select('*').eq('exam_id', examId).range(from, to),
+          supabase
+            .from('exam_marks')
+            .select('*')
+            .eq('exam_id', examId)
+            .order('id', { ascending: true })
+            .range(from, to),
         ),
         supabase
           .from('exam_results')

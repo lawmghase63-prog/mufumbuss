@@ -135,7 +135,12 @@ export default function Exams() {
     try {
       const [marksRes, studentsRes, subjectsRes] = await Promise.all([
         paginate(async ({ from, to }) =>
-          supabase.from('exam_marks').select('*').eq('exam_id', exam.id).range(from, to),
+          supabase
+            .from('exam_marks')
+            .select('*')
+            .eq('exam_id', exam.id)
+            .order('id', { ascending: true })
+            .range(from, to),
         ),
         supabase.from('students').select('id, form, status'),
         supabase.from('subjects').select('id, type'),
