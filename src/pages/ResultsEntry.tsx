@@ -292,16 +292,18 @@ export default function ResultsEntry() {
       practical: number | null
       absent: boolean
     }[] = []
+    const removals: { exam_id: string; student_id: string; subject_id: string }[] = []
 
     const practical = showsPractical(selectedSubject)
+    const subjectId = selectedSubject.id
     activeStudents.forEach((s) => {
-      const entry = entries.get(keyOf(s.id, selectedSubject.id))
+      const entry = entries.get(keyOf(s.id, subjectId))
       if (!entry) return
       if (entry.absent) {
         rows.push({
           exam_id: exam.id,
           student_id: s.id,
-          subject_id: selectedSubject.id,
+          subject_id: subjectId,
           theory: 0,
           practical: null,
           absent: true,
@@ -310,34 +312,66 @@ export default function ResultsEntry() {
       }
       const theory = parseMark(entry.theory)
       const pract = practical ? parseMark(entry.practical) : null
-      if (theory === null && pract === null) return
+      if (theory === null && pract === null) {
+        removals.push({ exam_id: exam.id, student_id: s.id, subject_id: subjectId })
+        return
+      }
       rows.push({
         exam_id: exam.id,
         student_id: s.id,
-        subject_id: selectedSubject.id,
+        subject_id: subjectId,
         theory: theory ?? 0,
         practical: pract,
         absent: false,
       })
     })
 
-    if (rows.length === 0) {
+    if (rows.length === 0 && removals.length === 0) {
       setFlash({ type: 'error', text: 'No marks entered for this subject yet.' })
       return
     }
 
     setSaving(true)
     setFlash(null)
-    const { error } = await supabase
-      .from('exam_marks')
-      .upsert(rows, { onConflict: 'exam_id,student_id,subject_id' })
+
+    let upsertError: { message: string } | null = null
+    if (rows.length > 0) {
+      const { error } = await supabase
+        .from('exam_marks')
+        .upsert(rows, { onConflict: 'exam_id,student_id,subject_id' })
+      upsertError = error as { message: string } | null
+    }
+
+    let deleteError: { message: string } | null = null
+    if (!upsertError && removals.length > 0) {
+      const or = removals.map(
+        (r) =>
+          `and(exam_id.eq.${r.exam_id},student_id.eq.${r.student_id},subject_id.eq.${r.subject_id})`,
+      )
+      const { error } = await supabase.from('exam_marks').delete().or(or.join(','))
+      deleteError = error as { message: string } | null
+    }
+
     setSaving(false)
-    if (error) {
-      setFlash({ type: 'error', text: error.message })
+    if (upsertError) {
+      setFlash({ type: 'error', text: upsertError.message })
+    } else if (deleteError) {
+      setFlash({ type: 'error', text: deleteError.message })
     } else {
+      const parts: string[] = []
+      if (rows.length) {
+        parts.push(
+          `saved ${rows.length} mark${rows.length === 1 ? '' : 's'}`,
+        )
+      }
+      if (removals.length) {
+        parts.push(
+          `removed ${removals.length} mark${removals.length === 1 ? '' : 's'}`,
+        )
+      }
       setFlash({
         type: 'ok',
-        text: `Saved ${rows.length} mark${rows.length === 1 ? '' : 's'} for ${selectedSubject.code} — Form ${selectedForm.slice(1)} (${exam.name}).`,
+        text: `${parts.join(' and ')} for ${selectedSubject.code} — Form ${selectedForm.slice(1)} (${exam.name}).`,
       })
       const res = await paginate(async ({ from, to }) =>
         supabase.from('exam_marks').select('*').eq('exam_id', exam.id).range(from, to),

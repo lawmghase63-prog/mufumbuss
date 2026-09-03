@@ -22,7 +22,7 @@ import FlashMessage from '../components/FlashMessage'
 import ConfirmDialog from '../components/ConfirmDialog'
 import ExamModal from '../components/ExamModal'
 import type { Exam, ExamMark, Division, StudentMarkEntry } from '../lib/exams'
-import { examTypeLabel, formatExamDates, computeDivision } from '../lib/exams'
+import { examTypeLabel, formatExamDates, computeDivision, formLevel } from '../lib/exams'
 import type { Student } from '../lib/students'
 
 export default function Exams() {
@@ -174,13 +174,28 @@ export default function Exams() {
         d_below: number
         total_points: number
       }[] = []
+      let absent = 0
       let skipped = 0
 
       for (const s of students) {
         if (s.status !== 'active') continue
         if (!formSet.has(s.form)) continue
         const entries = byStudent.get(s.id)
-        if (!entries) continue
+        if (!entries) {
+          rows.push({
+            exam_id: exam.id,
+            student_id: s.id,
+            form: s.form,
+            level: formLevel(s.form),
+            division: '0' as Division,
+            subjects_used: 0,
+            best_count: 0,
+            d_below: 0,
+            total_points: 0,
+          })
+          absent++
+          continue
+        }
         const result = computeDivision(s.form, entries, subjectTypes)
         if (!result) {
           skipped++
@@ -212,7 +227,7 @@ export default function Exams() {
         .upsert(rows, { onConflict: 'exam_id,student_id' })
       if (error) throw new Error(error.message)
 
-      const summary = `Processed ${rows.length} students for "${exam.name}"${skipped ? ` (${skipped} without enough marks)` : ''}.`
+      const summary = `Processed ${rows.length} students for "${exam.name}"${absent ? ` (${absent} absent)` : ''}${skipped ? ` (${skipped} without enough marks)` : ''}.`
       setFlash({ type: 'ok', text: summary })
       load()
       navigate(analysisPath(exam.id))

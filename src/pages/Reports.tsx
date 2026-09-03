@@ -473,8 +473,11 @@ async function buildPdf(
       absent: m.absent,
     }))
     const comp = computeDivision(form, entries, subjectTypes)
-    const totalPoints = comp?.points ?? r.total_points
-    const division = comp?.division ?? r.division
+    const isAbsent = myMarks.length === 0 && comp === null
+    const totalPoints = comp?.points ?? (isAbsent ? 0 : r.total_points)
+    const division = isAbsent
+      ? 'ABSENT'
+      : comp?.division ?? r.division
 
     const myHistRaw = histResults.filter((h) => h.student_id === r.student_id)
     const history: HistRow[] = []
@@ -525,8 +528,12 @@ async function buildPdf(
       division,
       rows,
       history,
-      comment: schoolComment(avg),
-      parentMsg: `Mzazi mpendwa wa ${student.full_name}, matokeo ya '${exam.name}' yamehitimishwa. Amepata wastani wa ${avg.toFixed(2)}% nafasi ya ${positionByStudent.get(r.student_id) ?? 0} kati ya wanafunzi ${cohort}. ${parentAdvice(avg)}`,
+      comment: isAbsent
+        ? 'Mwanafunzi hakufanya mtihani huu. Mzazi ashirikiane na shule kujua sababu ya kutofanya mtihani.'
+        : schoolComment(avg),
+      parentMsg: isAbsent
+        ? `Mzazi mpendwa wa ${student.full_name}, mwanafunzi hakufanya mtihani wa '${exam.name}' (ABSENT). Tafadhali wasiliana na shule kwa maelezo zaidi.`
+        : `Mzazi mpendwa wa ${student.full_name}, matokeo ya '${exam.name}' yamehitimishwa. Amepata wastani wa ${avg.toFixed(2)}% nafasi ya ${positionByStudent.get(r.student_id) ?? 0} kati ya wanafunzi ${cohort}. ${parentAdvice(avg)}`,
     })
   }
 
@@ -546,7 +553,18 @@ async function buildPdf(
       margin: { left: MARGIN, right: MARGIN },
       theme: 'grid',
       head: [['SOMO', 'ALAMA', 'DARAJA', 'POINTI', 'MAONI']],
-      body: card.rows.map((r) => [r.name, r.mark, r.grade, r.point, r.remark]),
+      body:
+        card.rows.length > 0
+          ? card.rows.map((r) => [r.name, r.mark, r.grade, r.point, r.remark])
+          : [
+              [
+                {
+                  content: 'HAJAFANYA MTIHANI (ABSENT)',
+                  colSpan: 5,
+                  styles: { halign: 'center' },
+                },
+              ],
+            ],
       headStyles: {
         fillColor: HEAD_FILL,
         textColor: 0,

@@ -32,6 +32,7 @@ interface ExamResultRow {
   student_id: string
   form: Form
   division: string
+  subjects_used?: number
 }
 
 interface Row {
@@ -117,7 +118,7 @@ export default function Sms() {
         ),
         supabase
           .from('exam_results')
-          .select('student_id, form, division')
+          .select('student_id, form, division, subjects_used')
           .eq('exam_id', examId),
       ])
       if (!alive) return
@@ -206,7 +207,7 @@ export default function Sms() {
       list.push({
         student,
         avg,
-        division: r.division,
+        division: (r.subjects_used ?? 0) === 0 ? 'ABSENT' : r.division,
         position: 0,
         total: 0,
       })

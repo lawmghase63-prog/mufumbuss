@@ -106,6 +106,7 @@ export default function Analysis() {
       division: Division
       d_below: number
       total_points: number
+      subjects_used?: number
     }[]
   >([])
   const [subjects, setSubjects] = useState<Subject[]>([])
@@ -122,6 +123,7 @@ export default function Analysis() {
   const [selectedCombinationId, setSelectedCombinationId] = useState<string | 'ALL'>('ALL')
   const [combinations, setCombinations] = useState<Combination[]>([])
   const [studentCombinations, setStudentCombinations] = useState<StudentCombination[]>([])
+  const [studentSubjects, setStudentSubjects] = useState<{ student_id: string; subject_id: string }[]>([])
   const [viewMode, setViewMode] = useState<'marks' | 'grade'>('marks')
   const [flash, setFlash] = useState<{ type: 'ok' | 'error'; text: string } | null>(
     null,
@@ -131,7 +133,7 @@ export default function Analysis() {
     let alive = true
     async function load() {
       setLoading(true)
-      const [examRes, studRes, marksRes, resultsRes, subjRes, settingsRes, combosRes, scRes] =
+      const [examRes, studRes, marksRes, resultsRes, subjRes, settingsRes, combosRes, scRes, ssRes] =
         await Promise.all([
           supabase.from('exams').select('*').eq('id', examId ?? '').maybeSingle(),
           supabase.from('students').select('*'),
@@ -146,6 +148,9 @@ export default function Analysis() {
           supabase.from('school_settings').select('*').maybeSingle(),
           supabase.from('combinations').select('*'),
           supabase.from('student_combinations').select('student_id, combination_id'),
+          paginate(async ({ from, to }) =>
+            supabase.from('student_subjects').select('student_id, subject_id').range(from, to),
+          ),
         ])
 
       if (!alive) return
@@ -165,12 +170,14 @@ export default function Analysis() {
           division: Division
           d_below: number
           total_points: number
+          subjects_used?: number
         }[]) ?? [],
       )
       setSubjects((subjRes.data as Subject[]) ?? [])
 
       setCombinations((combosRes.data as Combination[]) ?? [])
       setStudentCombinations((scRes.data as StudentCombination[]) ?? [])
+      setStudentSubjects((ssRes.data as { student_id: string; subject_id: string }[]) ?? [])
 
       const settingsRow = settingsRes.data as SchoolSettings | null
       setSettings(settingsRow)
@@ -232,9 +239,42 @@ export default function Analysis() {
     const passBySubject = new Map<string, number>()
     const pointsSumBySubject = new Map<string, number>()
 
+    const subjectIdByCode = new Map<string, string>()
+    for (const s of subjects) subjectIdByCode.set(s.code, s.id)
+    const comboById = new Map<string, Combination>()
+    for (const c of combinations) comboById.set(c.id, c)
+    const comboByStudent = new Map<string, string>()
+    for (const sc of studentCombinations) comboByStudent.set(sc.student_id, sc.combination_id)
+
+    const scopeStudentIds = new Set(formFilteredResults.map((r) => r.student_id))
+    for (const sid of scopeStudentIds) {
+      const student = studentById.get(sid)
+      if (!student) continue
+      const ids = new Set<string>()
+      if (student.form === 'F5' || student.form === 'F6') {
+        const combo = comboById.get(comboByStudent.get(sid) ?? '')
+        if (combo) {
+          for (const code of combo.core_subjects) {
+            const id = subjectIdByCode.get(code)
+            if (id) ids.add(id)
+          }
+          for (const code of combo.subsidiary_subjects) {
+            const id = subjectIdByCode.get(code)
+            if (id) ids.add(id)
+          }
+        }
+      } else {
+        for (const ss of studentSubjects) {
+          if (ss.student_id === sid) ids.add(ss.subject_id)
+        }
+      }
+      for (const id of ids) {
+        regBySubject.set(id, (regBySubject.get(id) ?? 0) + 1)
+      }
+    }
+
     for (const m of formFilteredMarks) {
       const total = subjectTotalMark(m)
-      regBySubject.set(m.subject_id, (regBySubject.get(m.subject_id) ?? 0) + 1)
       if (total == null) continue
       const level = subjectLevel(m.subject_id)
       satBySubject.set(m.subject_id, (satBySubject.get(m.subject_id) ?? 0) + 1)
@@ -281,6 +321,22 @@ export default function Analysis() {
       const student = studentById.get(r.student_id)
       if (!student) continue
       const level = r.level
+
+      if ((r.subjects_used ?? 0) === 0) {
+        resultRows.push({
+          position: 0,
+          name: student.full_name,
+          gender: student.gender === 'M' ? 'M' : 'F',
+          avg: 0,
+          grade: '-',
+          pts: 0,
+          division: 'ABS' as Division,
+          subjects: 'ABSENT',
+          subjectsMarks: 'ABSENT',
+        })
+        continue
+      }
+
       const totals = formFilteredMarks
         .filter((m) => m.student_id === r.student_id)
         .map(subjectTotalMark)
@@ -348,6 +404,7 @@ export default function Analysis() {
       '0': { boys: 0, girls: 0, total: 0 },
     }
     for (const r of formFilteredResults) {
+      if ((r.subjects_used ?? 0) === 0) continue
       const student = studentById.get(r.student_id)
       if (!student) continue
       const d = divByGender[r.division]
@@ -401,7 +458,7 @@ export default function Analysis() {
       schoolGpa,
       allTotals,
     }
-  }, [processed, formFilteredResults, formFilteredMarks, subjectById, studentById, subjects])
+  }, [processed, formFilteredResults, formFilteredMarks, subjectById, studentById, subjects, studentSubjects, combinations, studentCombinations])
 
   async function saveSettings() {
     setSavingSettings(true)
